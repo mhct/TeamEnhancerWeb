@@ -1,13 +1,17 @@
 (function() {
-  var app, express;
+  var app, express, port;
 
   express = require('express');
 
   app = express.createServer();
 
-  app.listen(3000);
-
   app.use(express.bodyParser());
+
+  port = process.env.PORT || 3000;
+
+  app.listen(port, function() {
+    return console.log("Listening on " + port);
+  });
 
   app.get('/lib/*', function(req, res) {
     return res.sendfile(__dirname + req.url);
