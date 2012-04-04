@@ -1,4 +1,14 @@
+README
+
 03/04/2012
 @mariohct
+
+GiveMeARide is an academic project to explore the possibilities of 
+coordinating a huge number of entities. The first example application is 
+coordinating a taxi's fleet. Each taxi has a mobile phone and updates is location to the services on the cloud. 
+
+A passenger asks a taxi ride using a mobile phone application. The COordination On Cloud (new acronyms here, COOC) service organizes which 
+taxi driver should pick the passenger.
+
 
 
