@@ -4,8 +4,12 @@ app = express.createServer()
 #store = require('./news_store') # database store
 #news = require('./news_server').at(app, store) #load the News event system
 
-app.listen 3000
 app.use express.bodyParser()
+
+port = process.env.PORT || 3000;
+
+app.listen port, () ->
+  console.log "Listening on #{port}"
 
 
 #
