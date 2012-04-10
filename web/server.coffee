@@ -1,7 +1,7 @@
 express = require('express')
 app = express.createServer()
 #admin = require('./admin_server').at(app) #Administrative server
-#store = require('./news_store') # database store
+store = require('./location_store') # database store
 #news = require('./news_server').at(app, store) #load the News event system
 
 app.use express.bodyParser()
@@ -37,13 +37,20 @@ app.get '/', (req, res) ->
 #                serverURL: 'http://134.58.46.145:3000',
 #                storyLineID: req.params.storyLineID})
 
+#App specific part
 app.get '/rider', (req, res) ->
     res.sendfile __dirname + '/templates/rider.html'
 
+
+# MW part
 app.post '/rider/:riderId', (req, res) ->
 	console.log "RiderId: #{req.params.riderId} lat: #{req.body.latitude}, lon: #{req.body.longitude}"
 	res.send 'OK'
 	
+app.post '/taxi/:taxiId', (req, res) ->
+        console.log "Taxi #{req.params.taxiId} updating location"
+        store.updateTaxiLocation(req.params.taxiId, req.body.locationUpdate)
+        res.send 'OK'
 
 console.log "Server ready!"
 

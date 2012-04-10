@@ -1,8 +1,7 @@
 #
-# NewsStore is responsible for storing news events, storylines, and abstracting from the
-# persistence layer
+# LocationStore is responsible for storing the location of all devices running the middleware
 #
-# 15/02/2012
+# 10/04/2012
 # @mariohct
 #
 redis = require('redis')
@@ -19,21 +18,14 @@ createStore = () ->
 #
 # TODO add broadcast function as callback and response() to backbone as well.
 #
-save = (event) ->
-    #if client.exists("storyline:#{event.storyLine}") == 0
-    client.incr("news:counter", (err, newsId) ->
-        console.log "Saving news: #{event}"
-        client.hset("news:#{newsId}", "description", event.news.description)
-        client.set("news:#{newsId}:date", event.news.date)
-        client.hmset("news:#{newsId}", "description", event.news.description, "date", event.news.date, (err, resp) ->
-            if err == null
-                client.lpush("storyline:#{event.storyLine}", newsId)
+updateTaxiLocation = (taxiId, locationUpdate) ->
+    console.log "locationUpdate data: #{locationUpdate}$"
+    client.lpush("taxi:#{taxiId}:location", locationUpdate, (err, resp) ->
+            if err != null
+                    console.log "ERROR updating taxi:#{taxiId} location"
             else
-                console.log "Error inserting NEWS#{newsId}: #{err}"
-        )
-
-        event.news.id = newsId
-    ) # atomic operation
+                    console.log "taxi:#{taxiId} location updated"
+    )
 
 #
 # Retrieve storylines stored in the redis db. Notice that the format of news:id is fixed as
@@ -70,5 +62,5 @@ respNewsToJSON = (resp) ->
 
 
 exports.createStore = createStore
-exports.save = save
+exports.updateTaxiLocation = updateTaxiLocation
 exports.retrieveNews = retrieveNews

@@ -57,7 +57,7 @@ function success(position) {
   });
 
 
-  sendLocation({latitude: position.coords.latitude, longitude: position.coords.longitude});
+  sendLocation({pickupLocation:{latitude: position.coords.latitude, longitude: position.coords.longitude}}, deliveryLocation:{latitude: 90, longitude: 100}, timeToPickup: 1);
 
 }
 
