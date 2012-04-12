@@ -16,7 +16,8 @@
   },
   "devDependencies": {
     "should": "0.5.1",
-    "socket.io-client": "0.8.7"
+    "socket.io-client": "0.8.7",
+    "nodeunit": "latest"
   },
   "engines": {
         "node": "0.6.14",

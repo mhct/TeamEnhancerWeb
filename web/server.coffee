@@ -1,7 +1,7 @@
 express = require('express')
 app = express.createServer()
 #admin = require('./admin_server').at(app) #Administrative server
-store = require('./location_store') # database store
+store = require('./location_store_mongo') #location store store
 #news = require('./news_server').at(app, store) #load the News event system
 
 app.use express.bodyParser()
@@ -25,18 +25,6 @@ app.get '/', (req, res) ->
 	#  res.sendfile __dirname + '/index.html'
     res.send 'OK'
 
-#app.get '/reader/:storyLineID', (req, res) ->
-#    res.render(__dirname + '/templates/reader.jade', {
-#                layout: false,
-#                serverURL: 'http://134.58.46.145:3000',
-#                storyLineID: req.params.storyLineID})
-
-#app.get '/taxireporter/:storyLineID', (req, res) ->
-#    res.render(__dirname + '/templates/reporter.jade', {
-#                layout: false,
-#                serverURL: 'http://134.58.46.145:3000',
-#                storyLineID: req.params.storyLineID})
-
 #App specific part
 app.get '/rider', (req, res) ->
     res.sendfile __dirname + '/templates/rider.html'
@@ -44,13 +32,13 @@ app.get '/rider', (req, res) ->
 
 # MW part
 app.post '/rider/:riderId', (req, res) ->
-	console.log "RiderId: #{req.params.riderId} lat: #{req.body.latitude}, lon: #{req.body.longitude}"
-	res.send 'OK'
-	
+        console.log "RiderId: #{req.params.riderId}"
+        store.findTaxiByLocation "#{req.params.riderId}", req.body.rideRequest, res
+
+
 app.post '/taxi/:taxiId', (req, res) ->
         console.log "Taxi #{req.params.taxiId} updating location"
-        store.updateTaxiLocation(req.params.taxiId, req.body.locationUpdate)
-        res.send 'OK'
+        store.updateTaxiLocation(req.params.taxiId, req.body.locationUpdate, res)
 
 console.log "Server ready!"
 

@@ -1,27 +1,33 @@
-RiderRequest
+#
+# RideRequest
+#
 {
-  "pickupLocation": {
-    "latitude": 10,
-    "longitude": 12
-  },
-  "deliveryLocation": {
-    "latitude": 90,
-    "longitude": 100
-  },
-  "timeToPickup": 1
+  "rideRequest": {
+    "pickupLocation": {
+      "latitude": 10,
+      "longitude": 12
+    },
+    "deliveryLocation": {
+      "latitude": 90,
+      "longitude": 100
+    },
+    "timeToPickup": 1
+  }
 }
 
-
-locationUpdate
+#
+# Locationupdate
+#
 {
-  "currentLocation": {
-    "latitude": 11,
-    "loingitude": 10
-  },
-  "headingToLocation": {
-    "latitude": 20,
-    "longitude": 10
-  },
-  "hasPassenger": false
+  "locationUpdate": {
+    "currentLocation": {
+      "latitude": 11,
+      "loingitude": 10
+    },
+    "headingToLocation": {
+      "latitude": 20,
+      "longitude": 10
+    },
+    "hasPassenger": false
+  }
 }
-
