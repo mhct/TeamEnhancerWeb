@@ -31,3 +31,21 @@
     "hasPassenger": false
   }
 }
+
+#
+# Device registration
+#
+{
+  "taxiId": 1,
+  "locationUpdate": {
+    "currentLocation": {
+      "latitude": 11,
+      "loingitude": 10
+    },
+    "headingToLocation": {
+      "latitude": 20,
+      "longitude": 10
+    },
+    "hasPassenger": false
+  }
+}

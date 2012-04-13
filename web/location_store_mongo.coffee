@@ -19,7 +19,7 @@ RiderRequest = new mongo.Schema({
 })
 
 TaxiLocation = new mongo.Schema({
-        taxiId                  :Number,
+        taxiId                  :{type: Number, unique:true}
         currentLocation         :[],
         headingToLocation       :[],
         hasPassenger            :Boolean
@@ -31,7 +31,7 @@ RiderRequest.index({
 })
 
 TaxiLocation.index({
-        currentLocation:'2d'
+        currentLocation:'2d',
         #headingToLocation:'2d'
 })
 
@@ -45,16 +45,22 @@ TaxiLocationModel = mongo.model('TaxiLocationModel', TaxiLocation)
 # TODO: receive a function for this search, since the way the search is
 # done should be defined at the application layer
 #
-findTaxiByLocation = (riderId, rideRequest, callback) ->
+findTaxiByLocation = (riderId, rideRequest, res, callback) ->
 
         MAX_DISTANCE = 0.018 #degree => +- 2 kilometers
-        TaxiLocationModel.find({currentLocation: {$near: [rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude], $maxDistance: MAX_DISTANCE}}, null, (err, results) ->
-                if err != null
-                        console.log "ERROR: #{err}"
-                        callback err
-                else
-                        console.log "Found #{results.length} entries"
-                        callback.send results
+        TaxiLocationModel.find(
+                {
+                        currentLocation: {$near: [rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude], $maxDistance: MAX_DISTANCE},
+                        hasPassenger: false
+                },
+                null,
+                (err, results) ->
+                        if err != null
+                                console.log "ERROR: #{err}"
+                                res.send err
+                        else
+                                console.log "Found #{results.length} entries"
+                                callback results, res
         )
 
 
@@ -62,24 +68,38 @@ findTaxiByLocation = (riderId, rideRequest, callback) ->
 # Saves a device's location on the database
 #
 updateLocation = (taxiId, locationUpdate, callback) ->
-        taxiLocation = new TaxiLocationModel({
-                taxiId: taxiId,
-                currentLocation: [locationUpdate.currentLocation.latitude, locationUpdate.currentLocation.longitude],
-                headingToLocation: [locationUpdate.headingToLocation.latitude, locationUpdate.headingToLocation.longitude],
-                hasPassenger: locationUpdate.hasPassenger
-        })
-
-        taxiLocation.save((err, res) ->
+        condition = {taxiId: taxiId}
+        options = {multi:false}
+        TaxiLocationModel.update(condition, locationUpdate, options, (err, res) ->
                 if err != null
                         console.log "ERROR persisting location update taxiId: #{taxiId}\n#{err}"
                 else
-                        callback.send "OK"
+                        callback.send "#{res} OK"
         )
 
+#
+# Registering device (taxi)
+#
+registerTaxi = (taxiRegistration, callback) ->
+        taxi = new TaxiLocationModel({
+                taxiId: taxiRegistration.taxiId,
+                currentLocation: [taxiRegistration.currentLocation.latitude, taxiRegistration.currentLocation.longitude],
+                headingToLocation: [taxiRegistration.headingToLocation.latitude, taxiRegistration.headingToLocation.longitude],
+                hasPassenger: taxiRegistration.hasPassenger
+        })
+
+        taxi.save((err, res) ->
+                if err != null
+                        console.log "ERROR persisting location update taxiId: #{err}"
+                        callback.send "NOK"
+                else
+                        callback.send "#{res} OK"
+        )
 
 
 exports.findTaxiByLocation = findTaxiByLocation
 exports.updateTaxiLocation = updateLocation
+exports.registerTaxi = registerTaxi
 
 
 
