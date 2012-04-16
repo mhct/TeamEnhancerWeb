@@ -7,10 +7,8 @@
 #
 express = require('express')
 app = express.createServer()
-#admin = require('./admin_server').at(app) #Administrative server
 store = require('./location_store_mongo') #location store store
-coordination = require('./coordination_service') # coordinatino service
-#news = require('./news_server').at(app, store) #load the News event system
+coordination = require('./coordination_service').at(app, store) # coordinatino service
 
 
 app.use express.bodyParser()
@@ -47,16 +45,16 @@ app.get '/rider', (req, res) ->
 #
 # Requests a taxi nearby the rider location
 #
-app.post '/riders/:riderId', (req, res) ->
-        console.log "RiderId: #{req.params.riderId}"
-        store.findTaxiByLocation "#{req.params.riderId}", req.body.rideRequest, res, coordination.coordinate
+#app.post '/riders/:riderId', (req, res) ->
+#        console.log "RiderId: #{req.params.riderId}"
+#        store.findTaxiByLocation "#{req.params.riderId}", req.body.rideRequest, res, coordination.coordinate
 
 #
 # Updates a Taxi's location
 #
-app.post '/taxis/:taxiId', (req, res) ->
-        console.log "Taxi #{req.params.taxiId} updating location"
-        store.updateTaxiLocation(req.params.taxiId, req.body.locationUpdate, res)
+#app.post '/taxis/:taxiId', (req, res) ->
+#        console.log "Taxi #{req.params.taxiId} updating location"
+#        store.updateTaxiLocation(req.params.taxiId, req.body.locationUpdate, res)
         
 #
 # Registers a new Device (Taxi)

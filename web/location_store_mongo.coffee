@@ -45,8 +45,8 @@ TaxiLocationModel = mongo.model('TaxiLocationModel', TaxiLocation)
 # TODO: receive a function for this search, since the way the search is
 # done should be defined at the application layer
 #
-findTaxiByLocation = (riderId, rideRequest, res, callback) ->
-
+#findTaxiByLocation = (riderId, rideRequest, res, callback) ->
+findTaxiByLocation = (rideRequest, fn) ->
         MAX_DISTANCE = 0.018 #degree => +- 2 kilometers
         TaxiLocationModel.find(
                 {
@@ -57,24 +57,24 @@ findTaxiByLocation = (riderId, rideRequest, res, callback) ->
                 (err, results) ->
                         if err != null
                                 console.log "ERROR: #{err}"
-                                res.send err
+                                fn err
                         else
                                 console.log "Found #{results.length} entries"
-                                callback results, res
+                                fn results
         )
 
 
 #
 # Saves a device's location on the database
 #
-updateLocation = (taxiId, locationUpdate, callback) ->
-        condition = {taxiId: taxiId}
+updateLocation = (locationUpdate, fn) ->
+        condition = {taxiId: locationUpdate.taxiId}
         options = {multi:false}
         TaxiLocationModel.update(condition, locationUpdate, options, (err, res) ->
                 if err != null
                         console.log "ERROR persisting location update taxiId: #{taxiId}\n#{err}"
                 else
-                        callback.send "#{res} OK"
+                        fn()
         )
 
 #
@@ -87,13 +87,15 @@ registerTaxi = (taxiRegistration, callback) ->
                 headingToLocation: [taxiRegistration.headingToLocation.latitude, taxiRegistration.headingToLocation.longitude],
                 hasPassenger: taxiRegistration.hasPassenger
         })
-
+        console.log "A"
         taxi.save((err, res) ->
+                console.log "WHEN"
                 if err != null
                         console.log "ERROR persisting location update taxiId: #{err}"
-                        callback.send "NOK"
+                        callback "NOK"
                 else
-                        callback.send "#{res} OK"
+                        console.log "PORRA"
+                        callback "#{res} OK"
         )
 
 
