@@ -61,7 +61,7 @@ app.get '/rider', (req, res) ->
 #
 app.post '/taxi', (req, res) ->
         console.log "Registering new device"
-        store.registerTaxi(req.body.taxiRegistration, res)
+        store.registerTaxi(req.body.taxiRegistration, (data) -> res.send data)
 
 
 console.log "Server ready!"

@@ -8,6 +8,7 @@
 mongo = require 'mongoose'
 connection = mongo.connect 'mongodb://localhost/test'
 
+
 #
 # Type definitions
 #
@@ -37,6 +38,13 @@ TaxiLocation.index({
 
 
 TaxiLocationModel = mongo.model('TaxiLocationModel', TaxiLocation)
+
+#
+# Returns a reference to the current database connection
+#
+getConnection = ->
+    connection
+
 
 #
 # Finds a device (in this case a TAXI) according to 
@@ -80,29 +88,25 @@ updateLocation = (locationUpdate, fn) ->
 #
 # Registering device (taxi)
 #
-registerTaxi = (taxiRegistration, callback) ->
+registerTaxi = (taxiRegistration, fn) ->
         taxi = new TaxiLocationModel({
                 taxiId: taxiRegistration.taxiId,
                 currentLocation: [taxiRegistration.currentLocation.latitude, taxiRegistration.currentLocation.longitude],
                 headingToLocation: [taxiRegistration.headingToLocation.latitude, taxiRegistration.headingToLocation.longitude],
                 hasPassenger: taxiRegistration.hasPassenger
         })
-        console.log "A"
         taxi.save((err, res) ->
-                console.log "WHEN"
                 if err != null
-                        console.log "ERROR persisting location update taxiId: #{err}"
-                        callback "NOK"
+                        fn "#{err}"
                 else
-                        console.log "PORRA"
-                        callback "#{res} OK"
+                        fn "OK"
         )
 
 
 exports.findTaxiByLocation = findTaxiByLocation
-exports.updateTaxiLocation = updateLocation
+exports.updateLocation = updateLocation
 exports.registerTaxi = registerTaxi
-
+exports.connection = getConnection
 
 
 

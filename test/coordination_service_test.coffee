@@ -64,14 +64,14 @@ rideRequest = {
 
 locationUpdate = {
   "locationUpdate": {
-    "taxiId": 1,
+    "taxiId": 6,
     "currentLocation": {
-      "latitude": 11,
-      "loingitude": 10
+      "latitude": 1,
+      "loingitude": 1
     },
     "headingToLocation": {
-      "latitude": 20,
-      "longitude": 10
+      "latitude": 1,
+      "longitude": 1
     },
     "hasPassenger": false
   }

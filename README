@@ -10,5 +10,12 @@ coordinating a taxi's fleet. Each taxi has a mobile phone and updates is locatio
 A passenger asks a taxi ride using a mobile phone application. The COordination On Cloud (new acronyms here, COOC) service organizes which 
 taxi driver should pick the passenger.
 
+===
+Testing
 
+- One can use MOCHA
+        mocha -R spec test/location_store_monfo_test.coffee  --compilers coffee:coffee-script
+- The Rest interface can be tested with curl
+- Adding taxis 
+        curl  -H "Content-Type: application/json" -X POST -d "{\"taxiRegistration\":{\"taxiId\":999,\"currentLocation\":{\"latitude\":60,\"longitude\":60},\"headingToLocation\":{\"latitude\":20,\"longitude\":10},\"hasPassenger\":false}}"  localhost:3000/taxi
 

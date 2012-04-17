@@ -2,7 +2,7 @@
 # 12/04/2012
 # @mariohct
 #
-# Location Store. Stores the location of devices running the middleware
+# Coordination Service 
 #
 #
 socket = require 'socket.io'
