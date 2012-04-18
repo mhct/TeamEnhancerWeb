@@ -6,39 +6,14 @@
 #
 
 should = require 'should'
-store = require '../web/location_store_mongo'
-Db = require('mongodb').Db
-Connection = require('mongodb').Connection
-Server = require('mongodb').Server
-
-#host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost'
-#port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT
-host = if process.env['MONG_NODE_DRIVER_HOST']? then process.env['MONGO_NODE_DRIVER_HOST'] else 'localhost'
-port = if process.env['MONG_NODE_DRIVER_PORT']? then process.env['MONGO_NODE_DRIVER_PORT'] else Connection.DEFAULT_PORT
-#host = 'localhost'
-
-clearDb = ->
-    console.log "host: #{host}, port=#{port}"
-    db = new Db('test', new Server(host, port, {}), {native_parser:true})
-
-    db.open (err, db) ->
-        console.log "A"
-        db.dropDatabase (err, result) ->
-            db.collection 'taxilocationmodels', (err, collection) ->
-                console.log "UHU"
-                # Erase all records from the collection, if any
-                #collection.remove {}, (err, result) ->
-                #    collection.count (err, count) ->
-                #        console.log "There are #{count} records in the taxilocationmodels collection"
+store = require('../web/location_store_mongo').at(':bla1111')
 
     
-
-
 #
 # Taxi Data
 #
 taxi = {
-  "taxiId": 4,
+  "taxiId": 6,
   "currentLocation": {
       "latitude": 11,
       "longitude": 10
@@ -54,8 +29,8 @@ rideRequest = {
  "rideRequest": {
     "clientId": 1,
     "pickupLocation": {
-      "latitude": 11,
-      "longitude": 10
+      "latitude": 11.000005,
+      "longitude": 10.000006
     },
     "deliveryLocation": {
       "latitude": 90,
@@ -65,20 +40,31 @@ rideRequest = {
   }
 }
 
+clearDb = (done) ->
+    store.TaxiLocationModel.remove(done)
+
+
 describe 'Location Store', ->
 
     before (done) ->
-        clearDb()
+        clearDb(done)
 
-    #after (done) ->
-        
-    
     it 'should persist devices locations', (done) ->
         store.registerTaxi taxi, (data) ->
             'OK'.should.equal data
-            done()
-    it 'should find near devices', (done) ->
+            store.registerTaxi taxi, (data) ->
+                'OK'.should.not.equal data
+                done()
+    
+    it 'should find nearby devices', (done) ->
         store.findTaxiByLocation rideRequest.rideRequest, (data) ->
-            data.should.have.length 1 #STILL HAVE TO CLEAR THE DB BEFORE THIS TEST
+            data.should.have.length 1
             done()
-            
+     
+    it "shouldn't find ANY nearby devices", (done) ->
+        rideRequest.rideRequest.pickupLocation.latitude = 10.1
+
+        store.findTaxiByLocation rideRequest.rideRequest, (data) ->
+            data.should.have.length 0
+            done()
+      

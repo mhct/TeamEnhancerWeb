@@ -6,35 +6,41 @@
 #
 #
 mongo = require 'mongoose'
-connection = mongo.connect 'mongodb://localhost/test'
+#connection = mongo.connect 'mongodb://localhost/test'
+connection = null
 
+at = (dbName) ->
+    connection = if dbName? then mongo.connect "mongodb://localhost/#{dbName}" else mongo.connect "mongodb://localhost/test"
+    this
 
 #
 # Type definitions
 #
-RiderRequest = new mongo.Schema({
-        riderId                 :Number,
-        pickupLocation          :[],
-        deliveryLocation        :[],
-        timeToPickup            :Number
-})
+RiderRequest = new mongo.Schema
+        riderId:
+            type:Number
+            unique:true
+        pickupLocation:[],
+        deliveryLocation:[],
+        timeToPickup:Number
 
-TaxiLocation = new mongo.Schema({
-        taxiId                  :{type: Number, unique:true}
-        currentLocation         :[],
-        headingToLocation       :[],
-        hasPassenger            :Boolean
-})
 
-RiderRequest.index({
-        pickupLocation:'2d'
-        #deliveryLocation:'2d'
-})
+TaxiLocation = new mongo.Schema
+    taxiId:
+        type:Number
+        unique:true
+    currentLocation:[],
+    headingToLocation:[],
+    hasPassenger:Boolean
 
-TaxiLocation.index({
-        currentLocation:'2d',
-        #headingToLocation:'2d'
-})
+
+RiderRequest.index(
+    {pickupLocation:'2d'}
+)
+
+TaxiLocation.index(
+    {currentLocation:'2d'}
+)
 
 
 TaxiLocationModel = mongo.model('TaxiLocationModel', TaxiLocation)
@@ -96,7 +102,7 @@ registerTaxi = (taxiRegistration, fn) ->
                 hasPassenger: taxiRegistration.hasPassenger
         })
         taxi.save((err, res) ->
-                if err != null
+                if err?
                         fn "#{err}"
                 else
                         fn "OK"
@@ -107,6 +113,6 @@ exports.findTaxiByLocation = findTaxiByLocation
 exports.updateLocation = updateLocation
 exports.registerTaxi = registerTaxi
 exports.connection = getConnection
-
-
+exports.at = at
+exports.TaxiLocationModel = TaxiLocationModel #using this only for tests, check how to improve
 
