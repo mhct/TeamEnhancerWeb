@@ -70,10 +70,10 @@ findTaxiByLocation = (rideRequest, fn) ->
                 null,
                 (err, results) ->
                         if err != null
-                                console.log "ERROR: #{err}"
+                                #console.log "ERROR: #{err}"
                                 fn err
                         else
-                                console.log "Found #{results.length} entries"
+                                #console.log "Found #{results.length} entries"
                                 fn results
         )
 

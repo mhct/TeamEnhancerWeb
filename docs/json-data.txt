@@ -35,7 +35,7 @@
 }
 
 #
-# Device registration
+# Device 
 #
 {
   "taxiId": 1,

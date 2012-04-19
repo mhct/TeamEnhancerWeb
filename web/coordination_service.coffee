@@ -6,11 +6,15 @@
 #
 #
 socket = require 'socket.io'
-
 io = null
-#        store.findTaxiByLocation "#{req.params.riderId}", req.body.rideRequest, res, coordination.coordinate
 
-
+#
+# Dispatches events to the controller and to the clients
+#
+# @app the port the service should listen to events
+# @store store with the location of devices
+# @callback called when the service is ready to listen to events
+#
 at = (app, store, callback) ->
     if 'undefined' == typeof callback
         io = socket.listen app
@@ -20,18 +24,29 @@ at = (app, store, callback) ->
     io.set 'log level', 1
     console.log 'Coordination Service started.'
     
+    clients = {}
     io.sockets.on 'connection', (socket) ->
         
         socket.on 'rideRequest', (event, response) ->
-            #console.log "#{event.rideRequest.pickupLocation.latitude}"
-            #store.findTaxiByLocation event.rideRequest, doStuff(res, io.sockets)
-            
-         
+            store.findTaxiByLocation event.rideRequest, (selectedTaxis) ->
+                for taxi in JSON.parse(selectedTaxis)
+                    if clients[taxi.taxiId]?
+                        clients[taxi.taxiId].emit 'rideOffer', 'MARIO'
+                socket.emit 'event1', "#{taxi.taxiId}" #TODO add event in the future
+
+            #store.findTaxiByLocation event.rideRequest, (selectedTaxis) ->
+            #    for taxi in selectedTaxis
+            #        clients[taxi.taxiId].emit 'rideOffer',event.rideRequest
+            #    socket.emit 'event1'
+            #socket.emit 'event1'
+
         socket.on 'locationUpdate', (event, response) ->
+            clients[event.locationUpdate.taxiId] = socket
             socket.set('id', event.locationUpdate.taxiId, ->
                 store.updateLocation event.locationUpdate, ->
                     socket.emit 'locationUpdated', '{"value":"ok"}'
             )
+
 
 
 
@@ -43,7 +58,8 @@ at = (app, store, callback) ->
 stop = (callback) ->
     io.server.close()
     console.log 'Coordination Service stoped.'
-    callback()
+    if callback?
+        callback()
 
 #
 # Coordinates a number os taxis

@@ -2,7 +2,7 @@
 # 16/04/2012
 # @mariohct
 #
-# Coordination service tests 
+# Coordination service TEST 
 #
 # TODO this is a first test unit test. Actually the deployed service
 # should have its own test. Currently I use the 'testLoadsService' flag 
@@ -11,11 +11,12 @@
 should = require 'should'
 io = require 'socket.io-client'
 coordService = require '../web/coordination_service'
+async = require 'async'
 
 class Mock
     findTaxiByLocation: (param, fn) ->
         #console.log "Parameters #{param}"
-        fn("{'result':'ok'}")
+        fn('[{"taxiId":1}, {"taxiId":2}]')
     
     updateLocation: (newLocation, fn) ->
         #console.log 'updateLocation called'
@@ -64,7 +65,7 @@ rideRequest = {
 
 locationUpdate = {
   "locationUpdate": {
-    "taxiId": 6,
+    "taxiId": 1,
     "currentLocation": {
       "latitude": 1,
       "loingitude": 1
@@ -85,43 +86,91 @@ describe 'Coordination Service', ->
             coordService.at port, storeMock, done
 
         after (done) ->
-            checkGuard()
-            coordService.stop done
+            coordService.stop()
+            checkGuard(done)
+            #done()
     
+    #
+    # Event occurrence guards
+    # TODO create Finite State Machine FSM for testing the event order, etc.
+    #
+    event1ReceivedGuard = false
+    locationUpdatedGuard = false
+    taxisReceivedOffer = false
+
     it 'should inform a user has connected', (done) ->
         client1 = io.connect socketUrl, options
 
-        client1.on 'connect', () ->
+        client1.on 'connect', ->
             client1.emit 'rideRequest', rideRequest
-            done()
-
+            client1.on 'event1', (data) ->
+                event1ReceivedGuard = true
+                done()
+        
         client1.on 'connect_failed', () ->
             should.fail 'Couldn\'t connect'
             done()
 
-        client1.on 'event1', (data) ->
-            should.be.ok
-            done()
-   
-    locationUpdatedGuard = false
-    it 'should update location', (done) ->
-        should.exist 'heee'
 
+    it 'should offer rideOffer to 2 taxis (see the Mock above)', (done) ->
+        client1 = io.connect socketUrl, options
         taxi1 = io.connect socketUrl, options
+        taxi2 = io.connect socketUrl, options
 
+        async.parallel([
+            (fn) ->
+                taxi1.emit('locationUpdate', {locationUpdate:{taxiId:1}})
+                fn()
+            ,
+            (fn) ->
+                taxi2.emit('locationUpdate', {locationUpdate:{taxiId:2}})
+                fn()
+        ], ->
+            async.parallel([
+                (fn) -> taxi1.on('locationUpdated', -> fn() )
+                ,
+                (fn) -> taxi2.on('locationUpdated', -> fn() )
+            ], ->
+                client1.emit 'rideRequest', rideRequest
+                async.parallel([
+                    (fn) -> taxi1.on('rideOffer', -> fn() )
+                    ,
+                    (fn) -> taxi2.on('rideOffer', -> fn() )
+                ], ->
+                    taxisReceivedOffer = true
+                    done()
+                )
+            )
+        )
+
+
+            #client1.on 'event1', (data) ->
+        #    event1ReceivedGuard = true
+        #    done()
+   
+    it 'should update location', (done) ->
+        taxi1 = io.connect socketUrl, options
+        
         taxi1.on 'connect', () ->
             taxi1.emit 'locationUpdate', locationUpdate
-            
-
+        
         taxi1.on 'locationUpdated', (data) ->
             obj = JSON.parse data #TODO only compare string, instead of parsing?!
             obj.value.should.equal 'ok'
             locationUpdatedGuard = true
             done()
 
-    checkGuard = () ->
-        if not locationUpdatedGuard
-            should.fail "Location wasn't updated"
+    it 'should award ride to best BID', (done) ->
+        taxi1 = io.connect socketUrl, options
+        #taxi1.on '
+        done()
+
+    checkGuard = (done) ->
+        if locationUpdatedGuard and event1ReceivedGuard and taxisReceivedOffer
+            true.should.be.ok
+        else
+            should.fail "At least ONE guard wasn't satisfied"
+        done()
 
 
 
