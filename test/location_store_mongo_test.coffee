@@ -26,7 +26,6 @@ taxi = {
 }
 
 rideRequest = {
- "rideRequest": {
     "clientId": 1,
     "pickupLocation": {
       "latitude": 11.000005,
@@ -37,7 +36,6 @@ rideRequest = {
       "longitude": 100
     },
     "timeToPickup": 1
-  }
 }
 
 clearDb = (done) ->
@@ -57,14 +55,14 @@ describe 'Location Store', ->
                 done()
     
     it 'should find nearby devices', (done) ->
-        store.findTaxiByLocation rideRequest.rideRequest, (data) ->
+        store.findTaxiByLocation rideRequest, (data) ->
             data.should.have.length 1
             done()
      
     it "shouldn't find ANY nearby devices", (done) ->
-        rideRequest.rideRequest.pickupLocation.latitude = 10.1
+        rideRequest.pickupLocation.latitude = 10.1
 
-        store.findTaxiByLocation rideRequest.rideRequest, (data) ->
+        store.findTaxiByLocation rideRequest, (data) ->
             data.should.have.length 0
             done()
       

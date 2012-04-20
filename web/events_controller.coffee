@@ -2,14 +2,27 @@
 # 12/04/2012
 # @mariohct
 #
-# Coordination Service 
+# Events Controller
 #
+# Responsible for receiveing and dispatching events to clients
 #
 socket = require 'socket.io'
+#coordService = require 'coordination_service'
+
+#
+# IO event listener
+#
 io = null
 
 #
-# Dispatches events to the controller and to the clients
+# List of available connected taxis/devices
+# TODO put this in redis
+#
+taxiSockets = {}
+
+
+#
+# Dispatches events using socket.io
 #
 # @app the port the service should listen to events
 # @store store with the location of devices
@@ -24,31 +37,46 @@ at = (app, store, callback) ->
     io.set 'log level', 1
     console.log 'Coordination Service started.'
     
-    clients = {}
     io.sockets.on 'connection', (socket) ->
         
         socket.on 'rideRequest', (event, response) ->
-            store.findTaxiByLocation event.rideRequest, (selectedTaxis) ->
-                for taxi in JSON.parse(selectedTaxis)
-                    if clients[taxi.taxiId]?
-                        clients[taxi.taxiId].emit 'rideOffer', 'MARIO'
-                socket.emit 'event1', "#{taxi.taxiId}" #TODO add event in the future
-
-            #store.findTaxiByLocation event.rideRequest, (selectedTaxis) ->
-            #    for taxi in selectedTaxis
-            #        clients[taxi.taxiId].emit 'rideOffer',event.rideRequest
-            #    socket.emit 'event1'
-            #socket.emit 'event1'
+            newRideRequest(store, socket, event.rideRequest)
 
         socket.on 'locationUpdate', (event, response) ->
-            clients[event.locationUpdate.taxiId] = socket
-            socket.set('id', event.locationUpdate.taxiId, ->
-                store.updateLocation event.locationUpdate, ->
-                    socket.emit 'locationUpdated', '{"value":"ok"}'
+            getTaxiSockets()[event.taxiId] = socket
+            socket.set('id', event.taxiId, ->
+                store.updateLocation event, ->
+                    socket.emit 'locationUpdated', '{"acknowledgement":"ok"}'
             )
 
+#
+# retrieves the list of sockets pointing to taxis/devices
+#
+getTaxiSockets = ->
+    taxiSockets
 
+#
+# Announces new RideRequest to all taxis in the neighboorhood
+#
+# @store store with locations of devices/taxis
+# @socket socket used by the client
+# @rideRequest from the client
+#
+newRideRequest = (store, socket, rideRequest) ->
+    COORDINATION_TIMEOUT = 10 # in milliseconds
 
+    store.findTaxiByLocation rideRequest, (selectedTaxis) ->
+        for taxi in JSON.parse(selectedTaxis)
+            if getTaxiSockets()[taxi.taxiId]?
+                getTaxiSockets()[taxi.taxiId].emit 'rideOffer', 'MARIO'
+
+    setTimeout(announceWinningTaxi, COORDINATION_TIMEOUT, socket)
+
+#
+# Finishes the coodination (Contractnet)
+#
+announceWinningTaxi = (clientSocket) ->
+    clientSocket.emit 'RideResponse', "taxi" #TODO add event in the future
 
 #
 # Stops the realtime event server
@@ -61,19 +89,7 @@ stop = (callback) ->
     if callback?
         callback()
 
-#
-# Coordinates a number os taxis
-#
-# @taxis = list of taxis in JSON format
-# @res = callback, expects a Http.Response object
-#
-simpleAuctionCoordinate = (taxis, res) ->
-    console.log "Should coordinate #{taxis.length}"
-
-    res.send "OK"
-        
 
 
-exports.coordinate = simpleAuctionCoordinate
 exports.at = at
 exports.stop = stop

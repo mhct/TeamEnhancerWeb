@@ -2,7 +2,6 @@
 # RideRequest
 #
 {
- "rideRequest": {
     "clientId": 1,
     "pickupLocation": {
       "latitude": 10,
@@ -13,39 +12,38 @@
       "longitude": 100
     },
     "timeToPickup": 1
-  }
 }
+
 
 #
 # Locationupdate
 #
 {
-  "locationUpdate": {
-    "taxiId": 1,
-    "currentLocation": {
-      "latitude": 11,
-      "loingitude": 10
+    "locationUpdate": {
+        "taxiId": 1,
+        "currentLocation": {
+        "latitude": 11,
+        "loingitude": 10
     },
     "headingToLocation": {
-      "latitude": 20,
-      "longitude": 10
+        "latitude": 20,
+        "longitude": 10
     },
     "hasPassenger": false
-  }
 }
 
 #
 # Device 
 #
 {
-  "taxiId": 1,
-  "currentLocation": {
-      "latitude": 11,
-      "loingitude": 10
-  },
-  "headingToLocation": {
-      "latitude": 20,
-      "longitude": 10
-  },
-  "hasPassenger": false
+    "taxiId": 1,
+    "currentLocation": {
+        "latitude": 11,
+        "loingitude": 10
+    },
+    "headingToLocation": {
+        "latitude": 20,
+        "longitude": 10
+    },
+    "hasPassenger": false
 }

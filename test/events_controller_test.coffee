@@ -2,15 +2,16 @@
 # 16/04/2012
 # @mariohct
 #
-# Coordination service TEST 
+# Events Controller Test 
 #
-# TODO this is a first test unit test. Actually the deployed service
-# should have its own test. Currently I use the 'testLoadsService' flag 
+# Tests the events controller
+#
+# Currently I use the 'testLoadsService' flag 
 # to alternate between local and deployed services
 #
 should = require 'should'
 io = require 'socket.io-client'
-coordService = require '../web/coordination_service'
+eventsController = require '../web/events_controller'
 async = require 'async'
 
 class Mock
@@ -49,7 +50,6 @@ options =
     'force new connection': true
 
 rideRequest = {
-  "rideRequest": {
     "clientId": 1,
     "pickupLocation": {
       "latitude": 10,
@@ -60,11 +60,9 @@ rideRequest = {
       "longitude": 100
     },
     "timeToPickup": 1
-  }
 }
 
 locationUpdate = {
-  "locationUpdate": {
     "taxiId": 1,
     "currentLocation": {
       "latitude": 1,
@@ -75,7 +73,6 @@ locationUpdate = {
       "longitude": 1
     },
     "hasPassenger": false
-  }
 }
 
 
@@ -83,10 +80,10 @@ describe 'Coordination Service', ->
     
     if testLoadsService
         before (done) ->
-            coordService.at port, storeMock, done
+            eventsController.at port, storeMock, done
 
         after (done) ->
-            coordService.stop()
+            eventsController.stop()
             checkGuard(done)
             #done()
     
@@ -103,7 +100,7 @@ describe 'Coordination Service', ->
 
         client1.on 'connect', ->
             client1.emit 'rideRequest', rideRequest
-            client1.on 'event1', (data) ->
+            client1.on 'RideResponse', (data) ->
                 event1ReceivedGuard = true
                 done()
         
@@ -119,11 +116,11 @@ describe 'Coordination Service', ->
 
         async.parallel([
             (fn) ->
-                taxi1.emit('locationUpdate', {locationUpdate:{taxiId:1}})
+                taxi1.emit('locationUpdate', {taxiId:1})
                 fn()
             ,
             (fn) ->
-                taxi2.emit('locationUpdate', {locationUpdate:{taxiId:2}})
+                taxi2.emit('locationUpdate', {taxiId:2})
                 fn()
         ], ->
             async.parallel([
@@ -156,14 +153,9 @@ describe 'Coordination Service', ->
         
         taxi1.on 'locationUpdated', (data) ->
             obj = JSON.parse data #TODO only compare string, instead of parsing?!
-            obj.value.should.equal 'ok'
+            obj.acknowledgement.should.equal 'ok'
             locationUpdatedGuard = true
             done()
-
-    it 'should award ride to best BID', (done) ->
-        taxi1 = io.connect socketUrl, options
-        #taxi1.on '
-        done()
 
     checkGuard = (done) ->
         if locationUpdatedGuard and event1ReceivedGuard and taxisReceivedOffer
