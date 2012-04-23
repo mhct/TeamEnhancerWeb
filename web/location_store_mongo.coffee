@@ -16,25 +16,43 @@ at = (dbName) ->
 #
 # Type definitions
 #
-RiderRequest = new mongo.Schema
+RideRequestSchema = new mongo.Schema
         riderId:
             type:Number
             unique:true
-        pickupLocation:[],
-        deliveryLocation:[],
+        pickupLocation:[]
+        deliveryLocation:[]
         timeToPickup:Number
+
+#getLocation = (location) ->
+#    obj = {}
+#    obj['latitude'] = 10
+#    obj['longitude'] = 1000
+#    return obj
+
+#
+# RideBid
+#
+RideBidSchema = new mongo.Schema
+    rideRequestId:
+        type: Number
+        index: true
+    taxiId: Number
+    estimatedTimeToPickup: Number
 
 
 TaxiLocation = new mongo.Schema
     taxiId:
         type:Number
         unique:true
-    currentLocation:[],
+    currentLocation:
+        type:[]
+        #get:getLocation
     headingToLocation:[],
     hasPassenger:Boolean
 
 
-RiderRequest.index(
+RideRequestSchema.index(
     {pickupLocation:'2d'}
 )
 
@@ -44,6 +62,8 @@ TaxiLocation.index(
 
 
 TaxiLocationModel = mongo.model('TaxiLocationModel', TaxiLocation)
+RideBid = mongo.model('RideBid', RideBidSchema)
+RideRequest = mongo.model('RideRequest', RideRequestSchema)
 
 #
 # Returns a reference to the current database connection
@@ -83,9 +103,15 @@ findTaxiByLocation = (rideRequest, fn) ->
 #
 updateLocation = (locationUpdate, fn) ->
         condition = {taxiId: locationUpdate.taxiId}
+        update =
+            taxiId: locationUpdate.taxiId
+            currentLocation: [locationUpdate.currentLocation.latitude, locationUpdate.currentLocation.longitude]
+            headingToLocation: [locationUpdate.headingToLocation.latitude, locationUpdate.headingToLocation.longitude]
+            hasPassenger: locationUpdate.hasPassenger
+
         options = {multi:false}
-        TaxiLocationModel.update(condition, locationUpdate, options, (err, res) ->
-                if err != null
+        TaxiLocationModel.update(condition, update, options, (err, res) ->
+                if err?
                         console.log "ERROR persisting location update taxiId: #{taxiId}\n#{err}"
                 else
                         fn()
@@ -108,11 +134,69 @@ registerTaxi = (taxiRegistration, fn) ->
                         fn "OK"
         )
 
+#
+# MakeBid
+#  
+# Registers a bid by a taxi
+#
+makeBid = (bid, fn) ->
+    rideBid = new RideBid(
+        rideRequestId: bid.rideRequestId
+        taxiId: bid.taxiId
+        estimatedTimeToPickup: bid.estimatedTimeToPickup
+    )
 
+    rideBid.save( (err, res) ->
+        if err?
+            console.log "EER"
+            fn "#{err}"
+        else
+            console.log "OK"
+            fn "ok"
+    )
+
+#
+# Collect Bids for a given request
+#
+# @rideRequestId ID of the ride request (or Id of the auction request)
+#
+collectBids = (rideRequest, fn) ->
+    RideBid.find {rideRequestId: rideRequest.rideRequestId}, (err, bidsFound) ->
+        if err?
+            fn err
+        else
+            fn bidsFound
+
+#
+# Make request
+#
+# Client makes a request (this should be in the application part, in a real app)
+#
+makeRequest = (rideRequest, fn) ->
+    request = new RideRequest(
+        riderId: rideRequest.riderId
+        pickupLocation:[rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude]
+        deliveryLocation:[rideRequest.deliveryLocation.latitude, rideRequest.deliveryLocation.longitude]
+        timeToPickup:rideRequest.timeToPickup
+    )
+
+    request.save (err, res) ->
+        if err?
+            console.log "ERR #{err}"
+            fn err
+        else
+            console.log "_ID: #{res._id}"
+            fn {_id:res._id}
+
+
+exports.makeRequest = makeRequest
 exports.findTaxiByLocation = findTaxiByLocation
 exports.updateLocation = updateLocation
 exports.registerTaxi = registerTaxi
 exports.connection = getConnection
 exports.at = at
 exports.TaxiLocationModel = TaxiLocationModel #using this only for tests, check how to improve
-
+exports.RideBid = RideBid #dirty hack for testing... check way to improve
+exports.RideRequest = RideRequest
+exports.makeBid = makeBid
+exports.collectBids = collectBids

@@ -105,18 +105,18 @@ RideRequest
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>590</x>
-      <y>260</y>
+      <x>800</x>
+      <y>430</y>
       <w>160</w>
       <h>120</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Event&gt;&gt;
-RideOffer
+RideAwarded
 --
 - rideRequestId
 - pickupLocation
 - deliveryLocation
-- timeToPickup
+- estimatedTimeToPickup
 
 </panel_attributes>
     <additional_attributes/>
@@ -163,7 +163,26 @@ RideResponse
 RideBid
 --
 - rideRequestId
+- taxiId
 - estimatedTimeToPickup
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>610</x>
+      <y>280</y>
+      <w>160</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Event&gt;&gt;
+RideOffer
+--
+- rideRequestId
+- pickupLocation
+- deliveryLocation
+- timeToPickup
 
 </panel_attributes>
     <additional_attributes/>

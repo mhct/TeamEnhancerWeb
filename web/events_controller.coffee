@@ -13,6 +13,7 @@ socket = require 'socket.io'
 # IO event listener
 #
 io = null
+_store = null
 
 #
 # List of available connected taxis/devices
@@ -29,6 +30,7 @@ taxiSockets = {}
 # @callback called when the service is ready to listen to events
 #
 at = (app, store, callback) ->
+    _store = store
     if 'undefined' == typeof callback
         io = socket.listen app
     else
@@ -39,8 +41,8 @@ at = (app, store, callback) ->
     
     io.sockets.on 'connection', (socket) ->
         
-        socket.on 'rideRequest', (event, response) ->
-            newRideRequest(store, socket, event.rideRequest)
+        socket.on 'rideRequest', (rideRequest, response) ->
+            newRideRequest(store, socket, rideRequest)
 
         socket.on 'locationUpdate', (event, response) ->
             getTaxiSockets()[event.taxiId] = socket
@@ -48,6 +50,10 @@ at = (app, store, callback) ->
                 store.updateLocation event, ->
                     socket.emit 'locationUpdated', '{"acknowledgement":"ok"}'
             )
+
+        socket.on 'rideBid', (bid, response) ->
+            store.makeBid bid, ->
+                socket.emit 'rideBidReceived', '{"acknowledgement":"ok"}'
 
 #
 # retrieves the list of sockets pointing to taxis/devices
@@ -64,19 +70,42 @@ getTaxiSockets = ->
 #
 newRideRequest = (store, socket, rideRequest) ->
     COORDINATION_TIMEOUT = 10 # in milliseconds
+    _store.makeRequest rideRequest, (res) ->
+        rideRequest._id = res._id #add _id to persisted rideRequest
+        _store.findTaxiByLocation rideRequest, (selectedTaxis) ->
+            #console.log "RE2: #{rideRequest}"
+            for taxi in JSON.parse(selectedTaxis)
+                if getTaxiSockets()[taxi.taxiId]?
+                    getTaxiSockets()[taxi.taxiId].emit 'rideOffer', rideRequest
 
-    store.findTaxiByLocation rideRequest, (selectedTaxis) ->
-        for taxi in JSON.parse(selectedTaxis)
-            if getTaxiSockets()[taxi.taxiId]?
-                getTaxiSockets()[taxi.taxiId].emit 'rideOffer', 'MARIO'
-
-    setTimeout(announceWinningTaxi, COORDINATION_TIMEOUT, socket)
+        setTimeout(announceWinningTaxi, COORDINATION_TIMEOUT, rideRequest, socket)
 
 #
 # Finishes the coodination (Contractnet)
 #
-announceWinningTaxi = (clientSocket) ->
-    clientSocket.emit 'RideResponse', "taxi" #TODO add event in the future
+# The taxi which replies with the LOWEST estimatedTimeToPickup wins
+#
+# @rideRequest information about the ride request by the client
+# @clientSocket socket used by the client who wants the Ride
+#
+# TODO rideRequestID but now it is only a regular json.. should persist the request before coming here
+announceWinningTaxi = (rideRequest, clientSocket) ->
+    _store.collectBids rideRequest, (bids) ->
+        winnerBid = {}
+        winnerBid.estimatedTimeToPickup = Number.MAX_VALUE
+        for bid in bids
+            if bid.estimatedTimeToPickup <= winnerBid.estimatedTimeToPickup
+                winnerBid = bid
+
+        if bids.length == 0
+            clientSocket.emit 'rideResponse', {taxiId: 0, estimatedTimeToPickup:-1}
+        else
+            clientSocket.emit 'rideResponse', {taxiId: "#{winnerBid.taxiId}",estimatedTimeToPickup: "#{winnerBid.estimatedTimeToPikcup}"}
+            if getTaxiSockets()[winnerBid.taxiId]?
+                getTaxiSockets()[winnerBid.taxiId].emit 'rideAwarded', rideRequest
+            else
+                console.log "ERROR, no socket found"
+
 
 #
 # Stops the realtime event server

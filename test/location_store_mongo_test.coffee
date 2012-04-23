@@ -39,7 +39,11 @@ rideRequest = {
 }
 
 clearDb = (done) ->
-    store.TaxiLocationModel.remove(done)
+    store.TaxiLocationModel.remove ->
+        store.RideBid.remove ->
+            store.RideRequest.remove ->
+                done()
+    
 
 
 describe 'Location Store', ->
@@ -65,4 +69,38 @@ describe 'Location Store', ->
         store.findTaxiByLocation rideRequest, (data) ->
             data.should.have.length 0
             done()
-      
+
+    it "should update location of a device", (done) ->
+        store.updateLocation taxi, ->
+            store.TaxiLocationModel.find({taxiId: taxi.taxiId}, (err, results) ->
+                if err?
+                    console.log "din't update taxis: #{err}"
+                else
+                    results.should.have.length 1
+                    results[0].currentLocation[0].should.equal taxi.currentLocation.latitude
+                    results[0].currentLocation[1].should.equal taxi.currentLocation.longitude
+                done()
+                )
+
+    it "should persist and collect a bid", (done) ->
+        bid =
+            rideRequestId: 1
+            taxiId: 1
+            estimatedTimeToPickup: 120
+
+        store.makeBid bid, (data) ->
+            data.should.equal "ok"
+
+            rideRequestId = 1
+
+            store.collectBids {rideRequestId:rideRequestId}, (data) ->
+                should.exist(data)
+                data.should.have.length 1
+                done()
+
+    it "should persist a RideRequest", (done) ->
+        store.makeRequest rideRequest, (data) ->
+            should.exist(data._id)
+            done()
+
+

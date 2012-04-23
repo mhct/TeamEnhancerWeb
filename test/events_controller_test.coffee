@@ -23,6 +23,14 @@ class Mock
         #console.log 'updateLocation called'
         fn()
 
+    makeBid: (bid, fn) ->
+        fn()
+
+    makeRequest: (request, fn) ->
+        fn {_id:1}
+
+    collectBids: (id, fn) ->
+        fn [{taxiId: 1, estimatedTimeToPickup: 310}, {taxiId:2, estimatedTimeToPickup: 30}]
 
 storeMock = new Mock
 port = null
@@ -76,7 +84,7 @@ locationUpdate = {
 }
 
 
-describe 'Coordination Service', ->
+describe 'Events Controller', ->
     
     if testLoadsService
         before (done) ->
@@ -94,13 +102,14 @@ describe 'Coordination Service', ->
     event1ReceivedGuard = false
     locationUpdatedGuard = false
     taxisReceivedOffer = false
+    contractNetComplete = false
 
-    it 'should inform a user has connected', (done) ->
+    it 'should send a rideResponse when clients sends rideRequest', (done) ->
         client1 = io.connect socketUrl, options
 
         client1.on 'connect', ->
             client1.emit 'rideRequest', rideRequest
-            client1.on 'RideResponse', (data) ->
+            client1.on 'rideResponse', (data) ->
                 event1ReceivedGuard = true
                 done()
         
@@ -141,10 +150,68 @@ describe 'Coordination Service', ->
         )
 
 
-            #client1.on 'event1', (data) ->
-        #    event1ReceivedGuard = true
-        #    done()
-   
+    it "should offer a rideRequest to a taxi, receive Bid, and acknowledge the bid", (done) ->
+        client11 = io.connect socketUrl, options
+        taxi99 = io.connect socketUrl, options
+
+        c = 0
+        taxi99.emit 'locationUpdate', {taxiId:91} ## CHECK TESTs states.. they are influencing each other.. what CANT happen
+
+        taxi99.on 'locationUpdated', ->
+            client11.emit 'rideRequest', rideRequest
+            taxi99.on 'rideOffer', (data) ->
+                c++
+                console.log "C: #{c}"
+                bid =
+                        rideRequestId: 1
+                        taxiId: 1
+                        estimatedTimeToPickup: 100
+
+                taxi99.emit 'rideBid', bid
+                    
+                    #taxi1.on 'rideBidReceived', (data) ->
+                    #    console.log "rideBidReceived"
+                    #    JSON.parse(data).acknowledgement.should.equal 'ok'
+                    #    #done()
+
+    it "should have the following events rideRequest,receiveBid, ackBid,awardBid", (done) ->
+        client1 = io.connect socketUrl, options
+        taxi1 = io.connect socketUrl, options
+
+
+        taxi1.emit 'locationUpdate', {taxiId:2}
+        taxi1.on 'locationUpdated', ->
+            client1.emit 'rideRequest', rideRequest
+            taxi1.on 'rideOffer', (data) ->
+                    bid =
+                        rideRequestId: 1
+                        taxiId: 2
+                        estimatedTimeToPickup: 10
+
+                    taxi1.emit 'rideBid', bid
+                    async.parallel([
+                        (fn) ->
+                            taxi1.on 'rideBidReceived', (data) ->
+                                JSON.parse(data).acknowledgement.should.equal 'ok'
+                                fn()
+                        ,
+                        (fn) ->
+                            taxi1.on 'rideAwarded', (data) ->
+                                console.log "WON JOB"
+                                fn()
+                        ,
+                        (fn) ->
+                            client1.on 'rideResponse', (data) ->
+                                console.log "CLIENT RECEIVED"
+                                fn()
+                    ], ->
+                        contractNetComplete = true
+                        done()
+                    )
+                        #TODO
+                        #create a FSM with all events I am interested, for every entry in the FSM I can add a function to emit an event.
+
+  
     it 'should update location', (done) ->
         taxi1 = io.connect socketUrl, options
         
@@ -158,7 +225,7 @@ describe 'Coordination Service', ->
             done()
 
     checkGuard = (done) ->
-        if locationUpdatedGuard and event1ReceivedGuard and taxisReceivedOffer
+        if locationUpdatedGuard and event1ReceivedGuard and taxisReceivedOffer and contractNetComplete
             true.should.be.ok
         else
             should.fail "At least ONE guard wasn't satisfied"
