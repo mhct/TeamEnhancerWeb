@@ -151,17 +151,21 @@ describe 'Events Controller', ->
 
 
     it "should offer a rideRequest to a taxi, receive Bid, and acknowledge the bid", (done) ->
-        client11 = io.connect socketUrl, options
+        client11 = io.connect socketUrl, options # should create another instance of the middleware Socket.io
         taxi99 = io.connect socketUrl, options
 
         c = 0
-        taxi99.emit 'locationUpdate', {taxiId:91} ## CHECK TESTs states.. they are influencing each other.. what CANT happen
+        taxi99.emit 'locationUpdate', {taxiId:1} ## CHECK TESTs states.. they are influencing each other.. what CANT happen
 
         taxi99.on 'locationUpdated', ->
+            #console.log "A"
             client11.emit 'rideRequest', rideRequest
             taxi99.on 'rideOffer', (data) ->
+                ##notice that this callback keeps in the context of other tests
+                #so, it is called twice during the execution of the test suit
+                #
                 c++
-                console.log "C: #{c}"
+                #console.log "C: #{c}"
                 bid =
                         rideRequestId: 1
                         taxiId: 1
@@ -169,10 +173,11 @@ describe 'Events Controller', ->
 
                 taxi99.emit 'rideBid', bid
                     
-                    #taxi1.on 'rideBidReceived', (data) ->
-                    #    console.log "rideBidReceived"
-                    #    JSON.parse(data).acknowledgement.should.equal 'ok'
-                    #    #done()
+                taxi99.on 'rideBidReceived', (data) ->
+                    console.log "rideBidReceived"
+                    JSON.parse(data).acknowledgement.should.equal 'ok'
+                    if c == 1 #TODO CRAZY DIRTY hack
+                        done()
 
     it "should have the following events rideRequest,receiveBid, ackBid,awardBid", (done) ->
         client1 = io.connect socketUrl, options
@@ -197,16 +202,19 @@ describe 'Events Controller', ->
                         ,
                         (fn) ->
                             taxi1.on 'rideAwarded', (data) ->
-                                console.log "WON JOB"
+                                #console.log "WON JOB"
                                 fn()
                         ,
                         (fn) ->
                             client1.on 'rideResponse', (data) ->
-                                console.log "CLIENT RECEIVED"
+                                #console.log "CLIENT RECEIVED"
                                 fn()
                     ], ->
                         contractNetComplete = true
+                        #console.log "KKK"
                         done()
+
+                       
                     )
                         #TODO
                         #create a FSM with all events I am interested, for every entry in the FSM I can add a function to emit an event.

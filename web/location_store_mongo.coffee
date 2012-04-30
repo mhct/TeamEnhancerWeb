@@ -73,7 +73,7 @@ getConnection = ->
 
 
 #
-# Finds a device (in this case a TAXI) according to 
+# Finds a device (in this case a TAXI) according to
 # a device (taxi) current location
 #
 # TODO: receive a function for this search, since the way the search is
