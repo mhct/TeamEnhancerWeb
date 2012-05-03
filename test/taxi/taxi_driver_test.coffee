@@ -7,7 +7,7 @@
 # Tests the taxi driver
 #
 should = require 'should'
-Driver = require('../../taxiclient/taxi_driver').Driver
+Driver = require('../../taxi/taxi_driver').Driver
 
 describe "TaxiDriver", ->
     it "should exist", (done) ->
