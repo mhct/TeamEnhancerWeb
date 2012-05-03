@@ -19,5 +19,8 @@ describe "Routing engine", ->
     it "should return an empty route if no route is found", (done) ->
         router.getRoute 50.875095, 4.703121, 50.856026, 4.695568, (list) ->
             list.length.should.equal 66
+            list[0].should.eql [50.874991, 4.703215]
+            console.log "VV: " + list[0][1]
+            list[list.length-1].should.eql [50.856024, 4.695738]
             done()
 

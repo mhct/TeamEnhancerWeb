@@ -18,15 +18,15 @@ exec = require('child_process').exec
 # @returns nothing
 #
 getRoute = (flat, flon, tlat, tlon, fn) ->
-    queryString = "QUERY_STRING=flat=#{flat}&flon=#{flon}&tlat=#{tlat}&tlon=#{tlon}&fast=0&v=motorcar"
+    queryString = "flat=#{flat}&flon=#{flon}&tlat=#{tlat}&tlon=#{tlon}&fast=0&v=motorcar"
     languageEnv = "en_US"
     environmentVars =
         QUERY_STRING: queryString
         LC_NUMERIC: languageEnv
 
-    #routingService = 'cat test/taxiclient/gosmore_output.txt'
+    routingService = 'cat test/taxi/gosmore_output.txt'
     #routingService = 'echo valor=$QUERY_STRING - $LC_NUMERIC'
-    routingService = 'gosmore'
+    #routingService = 'gosmore'
 
     #TODO, get path from the configuration
     child = exec routingService, {env: environmentVars},
@@ -42,6 +42,5 @@ parseOutput = (output) ->
     route = []
     for routingLine in rawRoutingData[2..rawRoutingData.length-3]
         temp = routingLine.split ","
-        route[route.length] = [temp[0], temp[1]]
-    
+        route[route.length] = [parseFloat(temp[0]), parseFloat(temp[1])]
 exports.getRoute = getRoute

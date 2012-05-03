@@ -21,11 +21,20 @@ task 'up', 'Prepare system to go up', ->
 	    console.log stdout + stderr
 
 task 'testall', 'Runs all tests under test/', ->
-    console.log "MARI".length + "+++" + "MARI".indexOf("R")
+    console.log "Starting tests suite"
 
-    fs.readdir 'test', (err, files) ->
-        throw err if err?
-        
-        for file in files when file.indexOf(".coffee") == (file.length - ".coffee".length)
-            exec "mocha --ui bdd --reporter spec test/#{file}  --compilers coffee:coffee-script", (err, stdout, stderr) ->
-                    console.log stdout + stderr
+    testDirs = ['test', 'test/taxi']
+
+    for dir in testDirs
+        #DIRTY HACK around the JS closure
+        ((dir) ->
+            fs.readdir dir, (err, files) ->
+                runTests(dir, err, files)
+        )(dir)
+
+runTests = (path, err, files) ->
+    throw err if err?
+
+    for file in files when file.indexOf(".coffee") == (file.length - ".coffee".length)
+        exec "mocha --ui bdd --reporter spec #{path}/#{file}  --compilers coffee:coffee-script", (err, stdout, stderr) ->
+            console.log stdout + stderr
