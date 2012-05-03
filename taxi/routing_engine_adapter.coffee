@@ -26,7 +26,7 @@ getRoute = (flat, flon, tlat, tlon, fn) ->
 
     routingService = 'cat test/taxi/gosmore_output.txt'
     #routingService = 'echo valor=$QUERY_STRING - $LC_NUMERIC'
-    #routingService = 'gosmore'
+    #routingService = '/home/u0061821/gosmore.sh'
 
     #TODO, get path from the configuration
     child = exec routingService, {env: environmentVars},
@@ -40,7 +40,7 @@ getRoute = (flat, flon, tlat, tlon, fn) ->
 parseOutput = (output) ->
     rawRoutingData = output.split("\n")
     route = []
-    for routingLine in rawRoutingData[2..rawRoutingData.length-3]
+    for routingLine in rawRoutingData[2..rawRoutingData.length-2]
         temp = routingLine.split ","
         route[route.length] = [parseFloat(temp[0]), parseFloat(temp[1])]
 exports.getRoute = getRoute

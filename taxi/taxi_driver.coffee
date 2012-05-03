@@ -4,8 +4,8 @@
 #
 # Taxi Driver 
 #
-# Responsible for driving the taxis, following the route defined by the GPS. It can 'say' where his cab currently is.
-# Currently it can drive his cab at a constant speed only.
+# Responsible for driving a taxi, following the route defined by the GPS. It can 'say' where his cab currently is.
+# Currently it only drives at a constant speed.
 #
 class Driver
     #
@@ -56,7 +56,7 @@ class Driver
 
     #
     # Creates a vector of distances between any too pairs of points, and ZEROES the @drivenTime
-    #
+    # Makes the driver start driving along the route, given by @waypoints
     addRoute: (@waypoints) ->
         @resetDrivenTime()
         for point, i in @waypoints[0...(@waypoints.length-1)]

@@ -66,4 +66,3 @@ Content-Type: text/plain
 50.857611,4.695792,J,(unknown-style),6,Naamsesteenweg
 50.857166,4.695779,J,(unknown-style),4,Naamsesteenweg
 50.856024,4.695738,j,(unknown-style),0,fini
-

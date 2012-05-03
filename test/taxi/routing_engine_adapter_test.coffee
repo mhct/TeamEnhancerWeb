@@ -16,11 +16,12 @@ describe "Routing engine", ->
     # When using the test/taxiclient/gosmore_output.txt file, this test should work. however it doesn't work with the real engine
     # It can be used to test the little parser for the output of gosmore
     #
-    it "should return an empty route if no route is found", (done) ->
+    it "should return a route", (done) ->
+        console.time("QUERY")
         router.getRoute 50.875095, 4.703121, 50.856026, 4.695568, (list) ->
+            console.timeEnd("QUERY")
             list.length.should.equal 66
             list[0].should.eql [50.874991, 4.703215]
-            console.log "VV: " + list[0][1]
             list[list.length-1].should.eql [50.856024, 4.695738]
             done()
 
