@@ -171,8 +171,8 @@ RideBid
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>610</x>
-      <y>280</y>
+      <x>590</x>
+      <y>260</y>
       <w>160</w>
       <h>120</h>
     </coordinates>

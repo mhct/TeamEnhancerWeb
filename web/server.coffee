@@ -8,7 +8,7 @@
 express = require('express')
 app = express.createServer()
 store = require('./location_store_mongo') #location store store
-coordination = require('./coordination_service').at(app, store) # coordinatino service
+coordination = require('./events_controller').at(app, store) # coordinatino service
 
 
 app.use express.bodyParser()
