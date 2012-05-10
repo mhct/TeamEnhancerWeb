@@ -176,7 +176,7 @@ describe 'Events Controller', ->
                 taxi99.on 'rideBidReceived', (data) ->
                     console.log "rideBidReceived"
                     JSON.parse(data).acknowledgement.should.equal 'ok'
-                    if c == 1 #TODO CRAZY DIRTY hack
+                    if c == 1 #TODO CRAZY DIRTY hack, why do I need this hack? TODO remember
                         done()
 
     it "should have the following events rideRequest,receiveBid, ackBid,awardBid", (done) ->

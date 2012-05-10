@@ -23,7 +23,7 @@
         "taxiId": 1,
         "currentLocation": {
         "latitude": 11,
-        "loingitude": 10
+        "longitude": 10
     },
     "headingToLocation": {
         "latitude": 20,

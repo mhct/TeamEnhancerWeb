@@ -35,6 +35,15 @@ describe "TaxiDriver", ->
         taxiDriver.getCurrentLocation(2.5).should.eql [3,4]
         done()
 
+    it "should calculate the distance from London to Amsterdam", (done) ->
+        taxiDriver = new Driver("Derick", 1, [51.519425, -0.124397])
+
+        #TODO improve should way of handling floats.
+        taxiDriver.london().should.equal 356.8707624
+        true.should.equalFloat()
+
+        done()
+
     it "should start driving AGAIN, when receives a new route", (done) ->
         taxiDriver = new Driver("ZE", 111)
         taxiDriver.addRoute([[0,0], [3,4], [30,40]])
@@ -62,7 +71,13 @@ describe "TaxiDriver", ->
     it "should make bid for rideOffer", (done) ->
         driver = new Driver("paula", 10, [50.874991, 4.703215])
         driver.makeBidFor {pickupLocation:{latitude:50.856024,longitude: 4.695738}}, (bid) ->
-            console.log "value: $#{bid}$"
+            bid.should.equal 0.26
+            done()
+
+    it "should head to somewhere", (done) ->
+        driver = new Driver("papa", 10, [10,10])
+        driver.headingTo()[0].should.equal 10
+        driver.headingTo()[1].should.equal 10
         done()
 
 

@@ -41,6 +41,9 @@ at = (app, store, callback) ->
     
     io.sockets.on 'connection', (socket) ->
         
+        socket.on 'data', (data) ->
+            console.log "received: #{data}"
+
         socket.on 'rideRequest', (rideRequest, response) ->
             newRideRequest(store, socket, rideRequest)
 

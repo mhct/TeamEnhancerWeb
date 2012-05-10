@@ -25,18 +25,36 @@ class Driver
     constructor: (@name, @speed, homeLocation) ->
         
         if 'undefined' == typeof homeLocation
-            @homeLocation = process.env.HOME_LOCATION || [50.874991,4.703215]
+            @homeLocation = [50.874991,4.703215]
         else
             @homeLocation = homeLocation
 
 
         @hasPassenger = false
+       
+        @degreeToRadian = (degree) ->
+            degree * Math.PI / 180
 
+        #
+        # Using model from http://derickrethans.nl/spatial-indexes-calculating-distance.html
+        #
         @distance = (a, b) ->
-            deltaX = (a[0] - b[0]) * (a[0] - b[0])
-            deltaY = (a[1] - b[1]) * (a[1] - b[1])
+            #deltaX = (a[0] - b[0]) * (a[0] - b[0])
+            #deltaY = (a[1] - b[1]) * (a[1] - b[1])
+            #Math.sqrt(deltaX + deltaY) * DISTANCE_CONVERSION_FACTOR
 
-            Math.sqrt(deltaX + deltaY) * DISTANCE_CONVERSION_FACTOR
+            latA = @degreeToRadian(a[0])
+            latB = @degreeToRadian(b[0])
+            lonA = @degreeToRadian(a[1])
+            lonB = @degreeToRadian(b[1])
+
+            dLat = latA - latB
+            dLon = lonA - lonB
+            d = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(latA) * Math.cos(latB) * Math.sin(dLon/2) * Math.sin(dLon/2)
+            d = 2 * Math.asin(Math.sqrt(d))
+            
+            return d * 6371
+
 
         #
         # Finds the current position (latitude, longitude) in the current Route
@@ -93,10 +111,13 @@ class Driver
     #
     # Creates a vector of distances between any too pairs of points, and ZEROES the @drivenTime
     # Makes the driver start driving along the route, given by @waypoints
+    #
     addRoute: (@waypoints) ->
         @resetDrivenTime()
         @distancesVector = @buildDistancesMap(@waypoints)
 
+    london: ->
+        @distance([51.519425, -0.12439], [52.375599,4.895039])
     #
     # Makes a bid for driving to a location
     # @param RideOffer
@@ -118,6 +139,13 @@ class Driver
 
     getHomeLocation: ->
         return @homeLocation
+
+    headingTo: ->
+        if @distancesVector.length > 0
+            @distancesVector[@distancesVector.length-1]
+        else
+            @getHomeLocation()
+
 
 #
 # Calculates driven distance in terms of time driving and the speed of the driver
