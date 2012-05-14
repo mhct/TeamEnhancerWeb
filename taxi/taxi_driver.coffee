@@ -162,6 +162,12 @@ class Driver
         else
             return false
 
+    getRideRequestId: ->
+        @rideRequestId
+
+    setRideRequestId: (id) ->
+        @rideRequestId = id
+
     getHomeLocation: ->
         return @homeLocation
 
