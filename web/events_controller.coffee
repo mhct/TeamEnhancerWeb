@@ -64,7 +64,11 @@ at = (app, store, callback) ->
                 socket.emit 'rideBidReceived', '{"acknowledgement":"ok"}'
 
         socket.on 'rideFinished', (rideData, response) ->
-            getClientsSockets()[rideData.rideRequestId].emit 'rideFinished', {ok: 'ok'}
+            console.log "rideData: #{i(rideData)}"
+            if getClientSockets()[rideData.rideRequestId]?
+                getClientSockets()[rideData.rideRequestId].emit 'rideFinished', {ok: 'ok'}
+            else
+                console.log "socket unavailable"
 
 getClientSockets = ->
     clientSockets
@@ -84,6 +88,7 @@ getTaxiSockets = ->
 newRideRequest = (store, socket, rideRequest) ->
     _store.makeRequest rideRequest, (res) ->
         rideRequest._id = res._id #add _id to persisted rideRequest
+        getClientSockets()[rideRequest._id] = socket
         console.log "nrr: #{rideRequest._id}"
         _store.findTaxiByLocation rideRequest, (selectedTaxis) ->
             console.log "RideRequest: #{i(rideRequest)}"
@@ -120,7 +125,6 @@ announceWinningTaxi = (rideRequest, clientSocket) ->
             if getTaxiSockets()[winnerBid.taxiId]?
                 getTaxiSockets()[winnerBid.taxiId].emit 'rideAwarded', rideRequest
                 clientSocket.emit 'rideResponse', {taxiId: "#{winnerBid.taxiId}",estimatedTimeToPickup: "#{winnerBid.estimatedTimeToPickup}"}
-                clientSockets[rideRequest._id] = clientSocket
             else
                 console.log "ERROR, no socket found"
 

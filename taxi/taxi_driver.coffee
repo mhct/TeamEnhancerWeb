@@ -153,11 +153,12 @@ class Driver
     finishRide: ->
         @addRoute([])
         @hasPassenger = false
+        @rideRequestId = 0
 
     hasFinishedRide: ->
         currentLocation = @getCurrentLocation 0
         heading = @headingTo()
-        if currentLocation[0] == heading[0] && currentLocation[1] == heading[1]
+        if currentLocation[0] == heading[0] && currentLocation[1] == heading[1] && @getRideRequestId() > 0
             return true
         else
             return false
