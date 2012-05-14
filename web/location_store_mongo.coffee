@@ -6,6 +6,8 @@
 #
 #
 mongo = require 'mongoose'
+i = require('util').inspect
+
 #connection = mongo.connect 'mongodb://localhost/test'
 connection = null
 
@@ -113,7 +115,9 @@ updateLocation = (locationUpdate, fn) ->
         TaxiLocationModel.update(condition, update, options, (err, res) ->
                 if err?
                         console.log "ERROR persisting location update taxiId: #{taxiId}\n#{err}"
+                        fn()
                 else
+                        console.log "LocationUpdated: taxiId: #{update.currentLocation}"
                         fn()
         )
 

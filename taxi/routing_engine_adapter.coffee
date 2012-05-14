@@ -6,6 +6,8 @@
 #
 exec = require('child_process').exec
 
+routingService = process.env.ROUTING_SERVICE || 'cat test/taxi/gosmore_output.txt'
+
 
 #
 # Calculates the route between two locations
@@ -24,7 +26,7 @@ getRoute = (flat, flon, tlat, tlon, fn) ->
         QUERY_STRING: queryString
         LC_NUMERIC: languageEnv
 
-    routingService = 'cat test/taxi/gosmore_output.txt'
+    #routingService = 'cat test/taxi/gosmore_output.txt'
     #routingService = 'echo valor=$QUERY_STRING - $LC_NUMERIC'
     #routingService = '/home/u0061821/gosmore.sh'
 

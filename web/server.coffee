@@ -7,7 +7,7 @@
 #
 express = require('express')
 app = express.createServer()
-store = require('./location_store_mongo') #location store store
+store = require('./location_store_mongo').at('store-tests1') #location store store
 coordination = require('./events_controller').at(app, store) # coordinatino service
 
 
@@ -62,6 +62,18 @@ app.get '/rider', (req, res) ->
 app.post '/taxi', (req, res) ->
         console.log "Registering new device"
         store.registerTaxi(req.body.taxiRegistration, (data) -> res.send data)
+
+
+app.post "/a", (req, res) ->
+    console.log "A #{req.body.value}"
+    #res.send "PORRA"
+    myfunc(req.body.value, (data) -> res.send(data) )
+
+
+myfunc = (value, fn) ->
+    console.log "MERDA value=#{value}"
+    setTimeout(fn, 10000, "#{value}")
+    #fn(value)
 
 
 console.log "Server ready!"

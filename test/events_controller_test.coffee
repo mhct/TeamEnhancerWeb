@@ -202,7 +202,7 @@ describe 'Events Controller', ->
                         ,
                         (fn) ->
                             taxi1.on 'rideAwarded', (data) ->
-                                #console.log "WON JOB"
+                                data.estimatedTimeToPickup.should.equal 10
                                 fn()
                         ,
                         (fn) ->

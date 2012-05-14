@@ -8,12 +8,10 @@
 # Currently it only drives at a constant speed.
 # FIXME change the distanceVector data structure, acumulate the total distance as key, instead of the segment length. 
 #
-# ENVIRONMENT_VARS
-# HOME_LOCATION = [latitude, longitude]
 #
 gps = require './routing_engine_adapter'
 
-DISTANCE_CONVERSION_FACTOR = 111 # one radian equals to 111 Km, what also means the Driver speed is given in hours
+#DISTANCE_CONVERSION_FACTOR = 111 # one radian equals to 111 Km, what also means the Driver speed is given in hours
 
 class Driver
     #
@@ -22,8 +20,12 @@ class Driver
     distancesVector: []
     drivenTime: 0
 
-    constructor: (@name, @speed, homeLocation) ->
-        
+    constructor: (@name, speed, homeLocation) ->
+        if 'undefined' == typeof speed
+            @speed = 10
+        else
+            @speed = speed
+
         if 'undefined' == typeof homeLocation
             @homeLocation = [50.874991,4.703215]
         else
@@ -116,7 +118,7 @@ class Driver
         @resetDrivenTime()
         @distancesVector = @buildDistancesMap(@waypoints)
 
-    london: ->
+    distanceLondonAmsterdam: ->
         @distance([51.519425, -0.12439], [52.375599,4.895039])
     #
     # Makes a bid for driving to a location
@@ -137,16 +139,43 @@ class Driver
                 timeToPick = totalDistance / @speed
                 fn(timeToPick)
 
+    addRide: (rideRequest) ->
+        currentLocation = @getCurrentLocation 0
+
+        gps.getRoute currentLocation[0], currentLocation[1], rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude, (waypoints) =>
+            if waypoints.length > 0
+                @hasPassenger = true
+                setRideRequestId(rideRequest._id)
+                @addRoute(waypoints)
+            else
+                console.log "NO ROUTE TO DESTINATION"
+
+    finishRide: ->
+        @addRoute([])
+        @hasPassenger = false
+
+    hasFinishedRide: ->
+        currentLocation = @getCurrentLocation 0
+        heading = @headingTo()
+        if currentLocation[0] == heading[0] && currentLocation[1] == heading[1]
+            return true
+        else
+            return false
+
     getHomeLocation: ->
         return @homeLocation
 
     headingTo: ->
         if @distancesVector.length > 0
-            @distancesVector[@distancesVector.length-1]
+            @distancesVector[@distancesVector.length-1].points[1]
         else
             @getHomeLocation()
 
-
+    hasPassenger111: ->
+        if @hasPassenger
+            true
+        else
+            false
 #
 # Calculates driven distance in terms of time driving and the speed of the driver
 #

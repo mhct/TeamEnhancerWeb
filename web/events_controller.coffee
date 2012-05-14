@@ -7,6 +7,8 @@
 # Responsible for receiveing and dispatching events to clients
 #
 socket = require 'socket.io'
+i = require('util').inspect
+
 #coordService = require 'coordination_service'
 
 #
@@ -15,12 +17,14 @@ socket = require 'socket.io'
 io = null
 _store = null
 
+COORDINATION_TIMEOUT = 1000 # in milliseconds
+
 #
 # List of available connected taxis/devices
 # TODO put this in redis
 #
 taxiSockets = {}
-
+clientSockets = {}
 
 #
 # Dispatches events using socket.io
@@ -45,6 +49,7 @@ at = (app, store, callback) ->
             console.log "received: #{data}"
 
         socket.on 'rideRequest', (rideRequest, response) ->
+            console.log 'rideRequest received'
             newRideRequest(store, socket, rideRequest)
 
         socket.on 'locationUpdate', (event, response) ->
@@ -58,6 +63,11 @@ at = (app, store, callback) ->
             store.makeBid bid, ->
                 socket.emit 'rideBidReceived', '{"acknowledgement":"ok"}'
 
+        socket.on 'rideFinished', (rideData, response) ->
+            getClientsSockets()[rideData.rideRequestId].emit 'rideFinished', {ok: 'ok'}
+
+getClientSockets = ->
+    clientSockets
 #
 # retrieves the list of sockets pointing to taxis/devices
 #
@@ -72,14 +82,18 @@ getTaxiSockets = ->
 # @rideRequest from the client
 #
 newRideRequest = (store, socket, rideRequest) ->
-    COORDINATION_TIMEOUT = 10 # in milliseconds
     _store.makeRequest rideRequest, (res) ->
         rideRequest._id = res._id #add _id to persisted rideRequest
+        console.log "nrr: #{rideRequest._id}"
         _store.findTaxiByLocation rideRequest, (selectedTaxis) ->
-            #console.log "RE2: #{rideRequest}"
-            for taxi in JSON.parse(selectedTaxis)
-                if getTaxiSockets()[taxi.taxiId]?
-                    getTaxiSockets()[taxi.taxiId].emit 'rideOffer', rideRequest
+            console.log "RideRequest: #{i(rideRequest)}"
+            console.log "SelectedTaxis: #{i(selectedTaxis)}"
+            if selectedTaxis? and selectedTaxis.length > 0
+                for taxi in selectedTaxis
+                    console.log "taxi: #{taxi}"
+                    if getTaxiSockets()[taxi.taxiId]?
+                        getTaxiSockets()[taxi.taxiId].emit 'rideOffer', rideRequest
+
 
         setTimeout(announceWinningTaxi, COORDINATION_TIMEOUT, rideRequest, socket)
 
@@ -101,11 +115,12 @@ announceWinningTaxi = (rideRequest, clientSocket) ->
                 winnerBid = bid
 
         if bids.length == 0
-            clientSocket.emit 'rideResponse', {taxiId: 0, estimatedTimeToPickup:-1}
+            clientSocket.emit 'rideResponse', {taxiId: -1, estimatedTimeToPickup:-1}
         else
-            clientSocket.emit 'rideResponse', {taxiId: "#{winnerBid.taxiId}",estimatedTimeToPickup: "#{winnerBid.estimatedTimeToPikcup}"}
             if getTaxiSockets()[winnerBid.taxiId]?
                 getTaxiSockets()[winnerBid.taxiId].emit 'rideAwarded', rideRequest
+                clientSocket.emit 'rideResponse', {taxiId: "#{winnerBid.taxiId}",estimatedTimeToPickup: "#{winnerBid.estimatedTimeToPickup}"}
+                clientSockets[rideRequest._id] = clientSocket
             else
                 console.log "ERROR, no socket found"
 
