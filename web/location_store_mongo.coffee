@@ -83,7 +83,7 @@ getConnection = ->
 #
 #findTaxiByLocation = (riderId, rideRequest, res, callback) ->
 findTaxiByLocation = (rideRequest, fn) ->
-        MAX_DISTANCE = 0.018 #degree => +- 2 kilometers
+        MAX_DISTANCE = 10 #0.018 #degree => +- 2 kilometers
         TaxiLocationModel.find(
                 {
                         currentLocation: {$near: [rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude], $maxDistance: MAX_DISTANCE},

@@ -18,9 +18,11 @@ i = require('util').inspect
 TaxiDriver = require('./taxi_driver').Driver
 
 socketUrl = process.env.EVENTS_SERVER || 'http://localhost:3000'
-agentName = process.env.AGENT_NAME || 1
-driverSpeed = process.env.DRIVER_SPEED || undefined
-homeLocation = process.env.HOME_LOCATION || undefined
+agentName = (Number) process.env.AGENT_NAME || 1
+driverSpeed = (Number) process.env.DRIVER_SPEED || undefined
+homeLocation = []
+homeLocation[0] = (Number) process.env.HOME_LOCATION_LATITUDE || undefined
+homeLocation[1] = (Number) process.env.HOME_LOCATION_LONGITUDE || undefined
 
 currentInterval = 1000
 socket = null
@@ -28,6 +30,7 @@ isConnected = false
 
 class TaxiAgent
     constructor: (@agentName, @socketUrl) ->
+        console.log "Loading TaxiAgent: #{@agentName}, at #{@socketUrl}, home: #{homeLocation}"
         @driver = new TaxiDriver(@agentName, driverSpeed, homeLocation)
 
     run: =>

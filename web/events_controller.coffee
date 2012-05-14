@@ -17,7 +17,7 @@ i = require('util').inspect
 io = null
 _store = null
 
-COORDINATION_TIMEOUT = 1000 # in milliseconds
+COORDINATION_TIMEOUT = 10000 # in milliseconds
 
 #
 # List of available connected taxis/devices
@@ -53,6 +53,7 @@ at = (app, store, callback) ->
             newRideRequest(store, socket, rideRequest)
 
         socket.on 'locationUpdate', (event, response) ->
+            console.log "locationUpdate #{i(event)}"
             getTaxiSockets()[event.taxiId] = socket
             socket.set('id', event.taxiId, ->
                 store.updateLocation event, ->
