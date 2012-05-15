@@ -17,8 +17,7 @@ Testing
         mocha -R spec test/location_store_monfo_test.coffee  --compilers coffee:coffee-script
 - The Rest interface can be tested with curl
 - Adding taxis 
-        curl  -H "Content-Type: application/json" -X POST -d "{\"taxiRegistration\":{\"taxiId\":999,\"currentLocation\":{\"latitude\":60,\"longitude\":60},\"headingToLocation\":{\"latitude\":20,\"longitude\":10},\"hasPassenger\":false}}"  localhost:3000/taxi
+        curl  -H "Content-Type: application/json" -X POST -d "{\"taxiRegistration\":{\"taxiId\":999,\"currentLocation\":{\"latitude\":50.856024,\"longitude\":4.695738},\"headingToLocation\":{\"latitude\":20,\"longitude\":10},\"hasPassenger\":false}}"  localhost:3000/taxi
 
 - executing TAXIAPP services using ssh
-ssh mario@192.168.2.4 ROUTING_SERVICE=\$HOME/gosmore.sh HOME_LOCATION=\[50.856024,4.695738\] EVENTS_SERVER=http://192.168.2.1:3000 AGENT_NAME=1 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide/taxi/taxi_agent.coffee
-
+ssh user@192.168.2.4 ROUTING_SERVICE=\$HOME/gosmore.sh HOME_LOCATION_LATITUDE=50.856024 HOME_LOCATION_LONGITUDE=4.6923 DRIVER_SPEED=10 TICK_INTERVAL=5000 ELAPSED_TIME=0.1  EVENTS_SERVER=http://192.168.2.1:3000 AGENT_NAME=1 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide/taxi/taxi_agent.coffee
