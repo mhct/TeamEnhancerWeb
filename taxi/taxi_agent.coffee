@@ -18,13 +18,14 @@ i = require('util').inspect
 TaxiDriver = require('./taxi_driver').Driver
 
 socketUrl = process.env.EVENTS_SERVER || 'http://localhost:3000'
-agentName = (Number) process.env.AGENT_NAME || 1
+agentName = (Number) process.env.AGENT_NAME || undefined
 driverSpeed = (Number) process.env.DRIVER_SPEED || undefined
+elapsedTime = (Number) process.env.ELAPSED_TIME || undefined
+tickInterval = (Number) process.env.TICK_INTERVAL || undefined
 homeLocation = []
 homeLocation[0] = (Number) process.env.HOME_LOCATION_LATITUDE || undefined
 homeLocation[1] = (Number) process.env.HOME_LOCATION_LONGITUDE || undefined
 
-currentInterval = 1000
 socket = null
 isConnected = false
 
@@ -75,7 +76,7 @@ class TaxiAgent
                 latitude: headingTo[0]
                 longitude: headingTo[1]
             hasPassenger: @driver.hasPassenger111()
-        #console.log i(locationUpdateEvent)
+        console.log i(locationUpdateEvent)
 
         @socket.emit "locationUpdate", locationUpdateEvent
 
@@ -100,7 +101,7 @@ myAgent.connect()
 #myAgent.driver.addRoute([[50,4],[20,20],[30,30],[40,40],[30,30],[170, 170]])
 
 
-setInterval(myAgent.updateLocation, currentInterval, 1)
+setInterval(myAgent.updateLocation, tickInterval, elapsedTime)
 
 process.on 'exit', ->
     now = new Date()

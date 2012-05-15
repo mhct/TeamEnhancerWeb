@@ -63,7 +63,7 @@ class Driver
         #
         # @return [Float,Float] = [Latitude,Longitude] of current position
         #
-        @findsLocation = (totalDistance) ->
+        @findsLocation = (totalDistance) =>
             previousPointer = 0
             walkedDistance = 0
           
@@ -74,7 +74,7 @@ class Driver
             # Finds the pair of points where a totalDistance is to be found
             #
             for a,i in @distancesVector
-                if totalDistance < a.distance
+                if totalDistance <= walkedDistance
                     #console.log "CALCULAR Distancia entre [#{a.points[0]}, #{a.points[1]}]"
                     #console.log "a partir de: #{walkedDistance}"
                     #console.log "distance: #{valor}"
@@ -114,9 +114,24 @@ class Driver
     # Creates a vector of distances between any too pairs of points, and ZEROES the @drivenTime
     # Makes the driver start driving along the route, given by @waypoints
     #
-    addRoute: (@waypoints) ->
+    addRoute: (waypoints) ->
+        @waypoints = waypoints
         @resetDrivenTime()
-        @distancesVector = @buildDistancesMap(@waypoints)
+        @distancesVector = @buildDistancesMap(waypoints)
+        #for distancia in @distancesVector
+            #console.log "d: #{distancia.distance}, coordi: #{distancia.points}"
+
+
+    getDistanceCurrentRide: ->
+        #@distance(@getCurrentLocation(0), @headingTo())
+        acumulator = 0.0
+        for i in @distancesVector
+            acumulator += i.distance
+
+        acumulator
+
+    getDrivenDistance: ->
+        drivenDistance(@drivenTime, @speed)
 
     distanceLondonAmsterdam: ->
         @distance([51.519425, -0.12439], [52.375599,4.895039])
@@ -129,7 +144,7 @@ class Driver
         #simple case, I am free and should pick passenger NOW
         if not @hasPassenger
             currentLocation = @getCurrentLocation 0
-            console.log "currentLocation: #{currentLocation}"
+            #console.log "currentLocation: #{currentLocation}"
             gps.getRoute currentLocation[0], currentLocation[1], rideOffer.pickupLocation.latitude, rideOffer.pickupLocation.longitude, (waypoints) =>
                 distancesMap = @buildDistancesMap(waypoints)
                 totalDistance = 0
@@ -139,16 +154,24 @@ class Driver
                 timeToPick = totalDistance / @speed
                 fn(timeToPick)
 
-    addRide: (rideRequest) ->
+    addRide: (rideRequest, fn) ->
         currentLocation = @getCurrentLocation 0
-
+        #console.log "A: currentLocation: #{currentLocation[0]}, #{currentLocation[1]}"
         gps.getRoute currentLocation[0], currentLocation[1], rideRequest.pickupLocation.latitude, rideRequest.pickupLocation.longitude, (waypoints) =>
+            #console.log "B"
             if waypoints.length > 0
+                #console.log "waypoints.length #{waypoints.length}"
+                #console.log "waypoints #{waypoints}"
+                #for i in [1..30]
+                #    console.log "#{waypoints[i*10]}"
+
                 @hasPassenger = true
-                setRideRequestId(rideRequest._id)
+                @setRideRequestId(rideRequest._id)
                 @addRoute(waypoints)
+                if fn? then fn('ok')
             else
                 console.log "NO ROUTE TO DESTINATION"
+                if fn? then fn('nok')
 
     finishRide: ->
         @addRoute([])
@@ -204,8 +227,8 @@ calculatesCoordinates = (displacement, currentLength, a, b) ->
     #console.log "calculates####\n\tdisplacement: #{displacement}\n\tcurrentLength: #{currentLength}\n\ta:#{a}\n\tb:#{b}"
 
     lengthPercentage = (displacement) / currentLength
-    x = a[0] + (lengthPercentage * Math.abs(b[0] - a[0]))
-    y = a[1] + (lengthPercentage * Math.abs(b[1] - a[1]))
+    x = a[0] + (lengthPercentage * (b[0] - a[0]))
+    y = a[1] + (lengthPercentage * (b[1] - a[1]))
 
     [x,y]
 
