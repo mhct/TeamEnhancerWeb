@@ -60,6 +60,7 @@ class TaxiAgent
        
 
     connect: =>
+        io.set('transports', ['xhr-polling'])
         @socket = io.connect @socketUrl
         this.run()
 

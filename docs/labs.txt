@@ -1,5 +1,3 @@
-@eupen.cs.kotnet.kuleuven.be
-
 aalst         up    3+03:34,     2 users,  load 1.04, 0.71, 0.50
 aarlen        up    6+03:55,     0 users,  load 1.19, 1.14, 1.17
 alken         up    6+03:58,     0 users,  load 0.00, 0.02, 0.02
@@ -87,4 +85,3 @@ voeren        up    6+03:55,     0 users,  load 0.00, 0.05, 0.05
 waver         up    3+16:55,     0 users,  load 0.05, 0.08, 0.11
 yvoir         up    6+03:58,     0 users,  load 0.68, 0.23, 0.11
 zwalm         up    3+03:31,     0 users,  load 0.11, 0.10, 0.02
-

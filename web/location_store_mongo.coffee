@@ -12,7 +12,7 @@ i = require('util').inspect
 connection = null
 
 at = (dbName) ->
-    connection = if dbName? then mongo.connect "mongodb://localhost/#{dbName}" else mongo.connect "mongodb://localhost/test"
+    connection = if dbName? then mongo.connect "mongodb://localhost/#{dbName}" else mongo.connect "mongodb://mw2012:bla132@staff.mongohq.com:10000/app3671227 "
     this
 
 #

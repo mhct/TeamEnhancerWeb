@@ -9,6 +9,7 @@
 socket = require 'socket.io'
 i = require('util').inspect
 
+
 #coordService = require 'coordination_service'
 
 #
@@ -41,6 +42,12 @@ at = (app, store, callback) ->
         io = socket.listen app, callback
 
     io.set 'log level', 1
+    io.configure(->
+        io.set("transports", ["xhr-polling"])
+        io.set("polling duration", 10)
+    )
+
+    
     console.log 'Coordination Service started.'
     
     io.sockets.on 'connection', (socket) ->

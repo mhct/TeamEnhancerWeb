@@ -17,6 +17,8 @@ class PassengerAgent
         #@passenger = new Passenger(@passengerName, @homeLocation)
 
     run: =>
+        console.log "something happens"
+
         @socket.on 'connect', ->
             console.log "#{passengerName} connected."
 
@@ -38,6 +40,7 @@ class PassengerAgent
             @requestARide(rideRequest)
 
     connect: =>
+        console.log "trying to connect. #{@socketUrl}"
         @socket = io.connect @socketUrl
         this.run()
 
@@ -66,7 +69,9 @@ ride =
 
 myPassenger.requestARide(ride)
 
-setInterval(console.log, 1000, 'nada')
+setTimeout(2000, console.log)
+
+setInterval(console.log, 1000)
 # testing
 # addroute
 
