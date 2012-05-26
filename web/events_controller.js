@@ -23,8 +23,9 @@
       io = socket.listen(app, callback);
     }
     io.set('log level', 1);
-    io.configure('production', function() {
-      return io.set('transports', ['xhr-polling']);
+    io.configure(function() {
+      io.set("transports", ["xhr-polling"]);
+      return io.set("polling duration", 10);
     });
     console.log('Coordination Service started.');
     return io.sockets.on('connection', function(socket) {
