@@ -11,8 +11,8 @@ i = require('util').inspect
 #connection = mongo.connect 'mongodb://localhost/test'
 connection = null
 
-at = (dbName) ->
-    connection = if dbName? then mongo.connect "mongodb://localhost/#{dbName}" else mongo.connect "mongodb://mw2012:bla132@staff.mongohq.com:10000/app3671227 "
+at = (dbDetails) ->
+    connection = if not dbName? then mongo.connect "mongodb://localhost/coosmw" else mongo.connect "mongodb://#{dbDetails.user}:#{dbDetails.password}@#{dbDetails.uri}/#{dbDetails.dbName}"
     this
 
 #

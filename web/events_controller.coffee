@@ -27,6 +27,13 @@ COORDINATION_TIMEOUT = 10000 # in milliseconds
 taxiSockets = {}
 clientSockets = {}
 
+connectionOptions =
+    "transports": ['xhr-polling']
+    'try multiple transports': false
+    'log level': 10
+
+    #"polling duration": 10
+
 #
 # Dispatches events using socket.io
 #
@@ -37,23 +44,27 @@ clientSockets = {}
 at = (app, store, callback) ->
     _store = store
     if 'undefined' == typeof callback
-        io = socket.listen app
+        io = socket.listen app, connectionOptions
+        console.log "without callback"
     else
         io = socket.listen app, callback
+        console.log "with callback"
 
-    io.set 'log level', 1
-    io.configure(->
-        io.set("transports", ["xhr-polling"])
-        io.set("polling duration", 10)
-    )
+    #io.set 'log level', 1
+    #io.configure(->
+    #    io.set("transports", ["xhr-polling"])
+    #    io.set("polling duration", 10)
+    #)
+    #io.set("transports", ["xhr-polling"])
+    #io.set("polling duration", 10)
 
-    
     console.log 'Coordination Service started.'
-    
+   
     io.sockets.on 'connection', (socket) ->
         
-        socket.on 'data', (data) ->
-            console.log "received: #{data}"
+        socket.on 'echo', (data) ->
+            console.log "echo: #{data}"
+            socket.emit "echoReply", {"data": data}
 
         socket.on 'rideRequest', (rideRequest, response) ->
             console.log 'rideRequest received'

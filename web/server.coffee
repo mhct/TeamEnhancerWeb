@@ -5,12 +5,29 @@
 # CoordMWServer
 # Initializes all the needed modules of the server part of the middleware
 #
+# CooS MW needs the following ENV VARS
+# DB_USER
+# DB_PASS
+# DB_URI
+# DB_DB_NAME
+#
 express = require('express')
 app = express.createServer()
-#store = require('./location_store_mongo').at('store-tests1') #location store store
-store = require('./location_store_mongo').at(null) #location store store
+store = require('./location_store_mongo').at(dbDetails) #location store store
+#store = require('./location_store_mongo').at(null) #location store store
 coordination = require('./events_controller').at(app, store) # coordinatino service
 
+#
+# Env vars
+#
+dbDetails = ->
+    details =
+        user: process.env.DB_USER || null
+        password: process.env.DB_PASS || null
+        uri: process.env.DB_URI || null
+        dbName: process.env.DB_DB_NAME || null
+
+    details
 
 app.use express.bodyParser()
 
@@ -33,6 +50,8 @@ app.get '/', (req, res) ->
 	#  res.sendfile __dirname + '/index.html'
     res.send 'OK'
 
+app.get '/test', (req, res) ->
+    res.sendfile __dirname + "/test/xhr-browser.html"
 #
 #App specific part
 #
