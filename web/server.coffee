@@ -11,12 +11,6 @@
 # DB_URI
 # DB_DB_NAME
 #
-express = require('express')
-app = express.createServer()
-store = require('./location_store_mongo').at(dbDetails) #location store store
-#store = require('./location_store_mongo').at(null) #location store store
-coordination = require('./events_controller').at(app, store) # coordinatino service
-
 #
 # Env vars
 #
@@ -28,6 +22,13 @@ dbDetails = ->
         dbName: process.env.DB_DB_NAME || null
 
     details
+
+express = require('express')
+app = express.createServer()
+store = require('./location_store_mongo').at(dbDetails()) #location store store
+#store = require('./location_store_mongo').at(null) #location store store
+coordination = require('./events_controller').at(app, store) # coordinatino service
+
 
 app.use express.bodyParser()
 
