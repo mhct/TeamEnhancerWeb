@@ -39,29 +39,29 @@ class CoosEventsDispatcher
             @socket.emit "locationUpdate", locationUpdateEvent
 
 
-    run: =>
-        @socket.on 'connect', =>
-            console.log "Device: #{@deviceID} connected."
+        run = () =>
+            @socket.on 'connect', =>
+                console.log "Device: #{@deviceID} connected."
 
-        @socket.on 'disconnect', =>
-            console.log "#{@deviceID} disconnected."
+            @socket.on 'disconnect', =>
+                console.log "#{@deviceID} disconnected."
 
-        @socket.on 'connect_failed', =>
-            console.log "#{@deviceID} connection failed."
+            @socket.on 'connect_failed', =>
+                console.log "#{@deviceID} connection failed."
 
-        @socket.on 'error', =>
-            console.log "Can not connect to CoosEventsServer #{socketUrl}"
+            @socket.on 'error', =>
+                console.log "Can not connect to CoosEventsServer #{socketUrl}"
 
-        ## deprecated
-        @socket.on 'rideAwarded', (rideRequest) =>
-            console.log "rideAwarded #{i(rideRequest)}"
-            @driver.addRide rideRequest
-       
+            ## deprecated
+            @socket.on 'collaboration_awarded', (data) =>
+                console.log "collaboration awarded #{i(rideRequest)}"
+                @participationCallback.collaborationAwarded data
+           
 
-    connect: =>
-        #io.set('transports', ['xhr-polling'])
-        @socket = io.connect @socketUrl
-        this.run()
+        connect = () =>
+            #io.set('transports', ['xhr-polling'])
+            @socket = io.connect @socketUrl
+            this.run()
 
     registerAsParticipant: (locationCallback, participationCallback) =>
         @locationCallback = locationCallback
