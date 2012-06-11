@@ -51,6 +51,14 @@ app.get '/', (req, res) ->
 	#  res.sendfile __dirname + '/index.html'
     res.send 'OK'
 
+app.get '/map', (req, res) ->
+    res.sendfile __dirname + "/map.html"
+
+app.get '/map2', (req, res) ->
+    res.sendfile __dirname + "/map2.html"
+
+
+
 app.get '/test', (req, res) ->
     res.sendfile __dirname + "/test/xhr-browser.html"
 #
@@ -96,6 +104,9 @@ myfunc = (value, fn) ->
     setTimeout(fn, 10000, "#{value}")
     #fn(value)
 
+
+app.on 'error', (data) ->
+    console.log "ERROR: #{data}"
 
 console.log "Server ready!"
 

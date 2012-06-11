@@ -44,7 +44,8 @@ connectionOptions =
 at = (app, store, callback) ->
     _store = store
     if 'undefined' == typeof callback
-        io = socket.listen app, connectionOptions
+        #io = socket.listen app, connectionOptions
+        io = socket.listen app
         console.log "without callback"
     else
         io = socket.listen app, callback
@@ -65,6 +66,7 @@ at = (app, store, callback) ->
         socket.on 'echo', (data) ->
             console.log "echo: #{data}"
             socket.emit "echoReply", {"data": data}
+            socket.broadcast.emit "locationUp", {id: data.id, lat: data.lat, lng: data.lng}
 
         socket.on 'rideRequest', (rideRequest, response) ->
             console.log 'rideRequest received'

@@ -36,7 +36,7 @@ storeMock = new Mock
 port = null
 socketUrl = null
 
-testLoadsService = true
+testLoadsService = false
 
 if testLoadsService
     #
@@ -54,7 +54,7 @@ else
 
 
 options =
-    transports: ['websockets']
+    #"transports": ['xhr-polling']
     'force new connection': true
 
 rideRequest = {
@@ -74,7 +74,7 @@ locationUpdate = {
     "taxiId": 1,
     "currentLocation": {
       "latitude": 1,
-      "loingitude": 1
+      "longitude": 1
     },
     "headingToLocation": {
       "latitude": 1,
@@ -220,17 +220,17 @@ describe 'Events Controller', ->
                         #create a FSM with all events I am interested, for every entry in the FSM I can add a function to emit an event.
 
   
-    it 'should update location', (done) ->
-        taxi1 = io.connect socketUrl, options
+    #it 'should update location', (done) ->
+    #    taxi1 = io.connect socketUrl, options
         
-        taxi1.on 'connect', () ->
-            taxi1.emit 'locationUpdate', locationUpdate
+    #    taxi1.on 'connect', () ->
+    #        taxi1.emit 'locationUpdate', locationUpdate
         
-        taxi1.on 'locationUpdated', (data) ->
-            obj = JSON.parse data #TODO only compare string, instead of parsing?!
-            obj.acknowledgement.should.equal 'ok'
-            locationUpdatedGuard = true
-            done()
+    #    taxi1.on 'locationUpdated', (data) ->
+    #        obj = JSON.parse data #TODO only compare string, instead of parsing?!
+    #        obj.acknowledgement.should.equal 'ok'
+    #        locationUpdatedGuard = true
+    #        done()
 
     checkGuard = (done) ->
         if locationUpdatedGuard and event1ReceivedGuard and taxisReceivedOffer and contractNetComplete

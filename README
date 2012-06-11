@@ -21,3 +21,21 @@ Testing
 
 - executing TAXIAPP services using ssh
 ssh user@192.168.2.4 ROUTING_SERVICE=\$HOME/gosmore.sh HOME_LOCATION_LATITUDE=50.856024 HOME_LOCATION_LONGITUDE=4.6923 DRIVER_SPEED=10 TICK_INTERVAL=5000 ELAPSED_TIME=0.1  EVENTS_SERVER=http://192.168.2.1:3000 AGENT_NAME=1 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide/taxi/taxi_agent.coffee
+
+
+===
+Server Setup 
+
+#DB
+bin/mongod --dbpath ~/givemearide_project/db
+
+#
+# setting up Server.coffee
+#
+ssh u0061821@aubel.cs.kotnet.kuleuven.be DB_USER=coffee DB_PASS=passwordForCoffee DB_URI="ciney.cs.kotnet.kuleuven.be:27017" DB_DB_NAME=mw2012 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide_project/givemearide/web/server.coffee
+
+
+#
+# triggering SIEGE remotelly
+#
+ssh  u0061821@bierbeek.cs.kotnet.kuleuven.be \$HOME/givemearide_project/siege/src/siege -t 10M -c200 --header "Content-type:application/json" -f \$HOME/givemearide_project/evaluation/taxis_siege.txt
