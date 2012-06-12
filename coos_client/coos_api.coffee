@@ -29,7 +29,7 @@ class CoosEventsDispatcher
                 return
 
             locationUpdateEvent =
-                        deviceId:@deviceId
+                        deviceId: @deviceId
                         currentLocation:
                                 latitude: currentLocation[0]
                                 longitude: currentLocation[1]
@@ -52,7 +52,16 @@ class CoosEventsDispatcher
             @socket.on 'error', =>
                 console.log "Can not connect to CoosEventsServer #{socketUrl}"
 
-            ## deprecated
+            @socket.on 'collaboration_requested', (data) =>
+                console.log "collaboration requested, #{data}"
+                @participationCallback.collaborationRequested data, (bid) =>
+                    collaborationBid =
+                                deviceId: @deviceId
+                                collaborationRequestId: data.collaborationRequestId
+                                payload: bid
+
+                    @socket.emit 'collaboration_bid', collaborationBid
+
             @socket.on 'collaboration_awarded', (data) =>
                 console.log "collaboration awarded #{i(rideRequest)}"
                 @participationCallback.collaborationAwarded data
