@@ -28,7 +28,7 @@ app = express.createServer()
 #store = require('./location_store_mongo').at(dbDetails()) #location store store
 #store = require('./location_store_mongo').at(null) #location store store
 #coordination = require('./events_controller').at(app, store) # coordinatino service
-coord = require('../coos_cloud').at(app, null)
+#coord = require('../coos_cloud').at(app, null)
 
 app.use express.bodyParser()
 
