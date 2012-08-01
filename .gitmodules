@@ -1,0 +1,3 @@
+[submodule "coos_cloud"]
+	path = coos_cloud
+	url = git@github.com:mhct/coos_cloud.git
