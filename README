@@ -1,0 +1,41 @@
+README
+
+03/04/2012
+@mariohct
+
+GiveMeARide is an academic project to explore the possibilities of 
+coordinating a huge number of entities. The first example application is 
+coordinating a taxi's fleet. Each taxi has a mobile phone and updates is location to the services on the cloud. 
+
+A passenger asks a taxi ride using a mobile phone application. The COordination On Cloud (new acronyms here, COOC) service organizes which 
+taxi driver should pick the passenger.
+
+===
+Testing
+
+- One can use MOCHA
+        mocha -R spec test/location_store_monfo_test.coffee  --compilers coffee:coffee-script
+- The Rest interface can be tested with curl
+- Adding taxis 
+        curl  -H "Content-Type: application/json" -X POST -d "{\"taxiRegistration\":{\"taxiId\":999,\"currentLocation\":{\"latitude\":50.856024,\"longitude\":4.695738},\"headingToLocation\":{\"latitude\":20,\"longitude\":10},\"hasPassenger\":false}}"  localhost:3000/taxi
+
+- executing TAXIAPP services using ssh
+ssh user@192.168.2.4 ROUTING_SERVICE=\$HOME/gosmore.sh HOME_LOCATION_LATITUDE=50.856024 HOME_LOCATION_LONGITUDE=4.6923 DRIVER_SPEED=10 TICK_INTERVAL=5000 ELAPSED_TIME=0.1  EVENTS_SERVER=http://192.168.2.1:3000 AGENT_NAME=1 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide/taxi/taxi_agent.coffee
+
+
+===
+Server Setup 
+
+#DB
+bin/mongod --dbpath ~/givemearide_project/db
+
+#
+# setting up Server.coffee
+#
+ssh u0061821@aubel.cs.kotnet.kuleuven.be DB_USER=coffee DB_PASS=passwordForCoffee DB_URI="ciney.cs.kotnet.kuleuven.be:27017" DB_DB_NAME=mw2012 PATH=\$PATH:\$HOME/nvm/v0.6.14/bin/  \$HOME/nvm/v0.6.14/bin/coffee \$HOME/givemearide_project/givemearide/web/server.coffee
+
+
+#
+# triggering SIEGE remotelly
+#
+ssh  u0061821@bierbeek.cs.kotnet.kuleuven.be \$HOME/givemearide_project/siege/src/siege -t 10M -c200 --header "Content-type:application/json" -f \$HOME/givemearide_project/evaluation/taxis_siege.txt

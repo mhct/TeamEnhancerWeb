@@ -1,0 +1,10 @@
+#TESTING
+
+#Taxi updating location
+curl  -H "Content-Type: application/json" -X POST -d "{\"locationUpdate\":{\"currentLocation\":{\"latitude\":11,\"longitude\":10},\"headingToLocation\":{\"latitude\":20,\"longitude\":10},\"hasPassenger\":false}}"  localhost:3000/taxi/1
+
+
+#Rider asking for a ride
+curl  -H "Content-Type: application/json" -X PO "{\"rideRequest\":{\"pickupLocation\":{\"latitude\":11,\"longitude\":10},\"deliveryLocation\":{\"latitude\":90,\"longitude\":100},\"timeToPickup\":1}}" localhost:3000/rider/1
+
+
