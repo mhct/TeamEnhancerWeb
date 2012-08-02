@@ -60,6 +60,8 @@ app.get '/map2', (req, res) ->
 app.get '/taskCreator', (req, res) ->
     res.sendfile __dirname + "/task_creator.html"
 
+app.get '/coos_client/coos_client.js', (req, res) ->
+    res.sendfile __dirname + "/coos_client/lib/coos_client.js
 app.get '/test', (req, res) ->
     res.sendfile __dirname + "/test/xhr-browser.html"
 #
