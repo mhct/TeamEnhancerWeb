@@ -59,7 +59,7 @@ app.get '/', (req, res) ->
     #  res.sendfile __dirname + '/index.html'
     res.send 'OK'
 
-app.get '/map', (req, res) ->
+app.get '/map|map2', (req, res) ->
     res.render 'map', {server_url: SERVER_URL}
 
 app.get '/taskCreator', (req, res) ->
