@@ -23,6 +23,11 @@ dbDetails = ->
 
     details
 
+SERVER_URL = process.env.SERVER_URL || "http://127.0.0.1:3000/"
+
+#
+# Required stuff
+#
 express = require('express')
 app = express.createServer()
 #store = require('./location_store_mongo').at(dbDetails()) #location store store
@@ -31,6 +36,9 @@ app = express.createServer()
 coord = require('../coos_cloud').at(app, null)
 
 app.use express.bodyParser()
+app.set 'views', "#{__dirname}/views"
+app.set 'view engine', 'jade'
+app.set 'view options', {layout:false}
 
 port = process.env.PORT || 3000;
 
@@ -52,16 +60,15 @@ app.get '/', (req, res) ->
     res.send 'OK'
 
 app.get '/map', (req, res) ->
-    res.sendfile __dirname + "/map.html"
-
-app.get '/map2', (req, res) ->
-    res.sendfile __dirname + "/map2.html"
+    res.render 'map', {server_url: SERVER_URL}
 
 app.get '/taskCreator', (req, res) ->
-    res.sendfile __dirname + "/task_creator.html"
+    #res.sendfile __dirname + "/task_creator.html"
+    res.render 'task_creator', {server_url: SERVER_URL}
 
 app.get '/coos_client/coos_client.js', (req, res) ->
-    res.sendfile __dirname + "/coos_client/lib/coos_client.js
+    res.sendfile __dirname + "/coos_client/coos_client.js"
+
 app.get '/test', (req, res) ->
     res.sendfile __dirname + "/test/xhr-browser.html"
 #
