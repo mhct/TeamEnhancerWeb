@@ -1,10 +1,11 @@
 html(lang="en")
         head
-                title= "porra"
+                title= "Task Creator Web"
                 link(rel='stylesheet',href='http://leaflet.cloudmade.com/dist/leaflet.css')
                 script(src='http://leaflet.cloudmade.com/dist/leaflet.js')
                 script(src='http://leaflet.cloudmade.com/dist/leaflet.js')
                 script(src='/socket.io/socket.io.js')
+                script(src='/coos_client/coos_client.js')
                 script(type='text/javascript')
                         var map;
                         var mapquestUrl;
@@ -19,12 +20,13 @@ html(lang="en")
                             mapquest = new L.TileLayer(mapquestUrl, {maxZoom: 18, attribution: mapquestAttrib, subdomains: subDomains});
                             map.addLayer(mapquest).setView(new L.LatLng(50.856024, 4.6923), 13);
 
-                            var socket = io.connect(serverUrl);
+                            var coos = new Coos(serverUrl, 10);
                             map.on('click', function(e) {
-                                        console.log("clicked at: " + e.latlng.lat + ", " + e.latlng.lng);
-                                        socket.emit("createTask", {lat: e.latlng.lat, lng: e.latlng.lng}, function() {
-                                            L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-                                        });
+                                L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+                                coos.requestCollaboration(null, null, {lat: e.latlng.lat, lng: e.latlng.lng}, function() {
+                                        //do something when the cooscloud server give the collaboration outcome
+                                    alert("Someone decided to collaborate");
+                                    });
                             });
                         }  
 

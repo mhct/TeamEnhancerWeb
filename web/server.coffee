@@ -67,7 +67,7 @@ app.get '/taskCreator', (req, res) ->
     res.render 'task_creator', {server_url: SERVER_URL}
 
 app.get '/coos_client/coos_client.js', (req, res) ->
-    res.sendfile __dirname + "/coos_client/coos_client.js"
+    res.sendfile __dirname + "/lib/coos_client.js"
 
 app.get '/test', (req, res) ->
     res.sendfile __dirname + "/test/xhr-browser.html"

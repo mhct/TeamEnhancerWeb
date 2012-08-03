@@ -11,6 +11,7 @@ html(lang="en")
                         var mapquestUrl;
                         var mapquest;
                         var serverUrl='#{server_url}';
+                        var hackDaPorra;
 
                         function init(){
                             map = new L.Map('map');
@@ -21,11 +22,26 @@ html(lang="en")
                             map.addLayer(mapquest).setView(new L.LatLng(50.856024, 4.6923), 13);
 
                             var coos = new Coos(serverUrl, 10);
-                            coos.registerAsParticipant(null, null, function(data) {
-                                            console.log("ParticipantCallback Called");
-                                            L.marker([data.lat, data.lng]).addTo(map);
+                            coos.registerAsParticipant(null, null, function(collaborationRequestDTO, cb) {
+                                            //Client app does some stuff here... 
+                                            console.log("ParticipantCallback working");
+                                            L.marker([collaborationRequestDTO.lat, collaborationRequestDTO.lng])
+                                            .bindPopup(taskPopup())
+                                            .addTo(map);
+                                            
+                                            hackDaPorra = {'id1': cb}; 
                                             });
                         }
+
+                        function taskPopup() {
+                            var pop = "<p>Task Description</p>";
+                            pop += "<form>";
+                            pop += "<input type='text' id='id1-bid'></text><a href=# id='id1' onclick=\\"hackDaPorra.id1('mario', 10)\\">Collaborate </a>  </form>";
+
+
+                            return pop;
+                        }
+
         body(onload='init()')
             #map(style='height: 100%')
 

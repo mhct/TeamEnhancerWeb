@@ -1,5 +1,5 @@
 #
-# Build script for storynode
+# Build script for TeamEnhancerWeb 
 # version: 0.1
 #
 # @mariohct
@@ -7,15 +7,25 @@
 {exec} = require 'child_process'
 fs = require 'fs'
 
-task 'buildClient', 'Build/depoly the client libraries', ->
-    exec 'coffee --compile --output web/lib/ src-client/', (err, stdout, stderr) ->
+#task 'buildClient', 'Build/depoly the client libraries', ->
+#    exec 'coffee --compile --output web/lib/ src-client/', (err, stdout, stderr) ->
+#        throw err if err?
+#        console.log stdout + stderr
+
+task 'build', 'Prepare system to go up', ->
+    #exec '~/opt/redis/src/redis-server', (err, stdout, stderr) ->
+	#    throw err if err?
+	#    console.log stdout + stderr
+    # updates libraries (cloud)
+    exec 'cd coos_cloud; git pull origin master', (err, stdout, stderr) ->
         throw err if err?
         console.log stdout + stderr
 
-task 'up', 'Prepare system to go up', ->
-    exec '~/opt/redis/src/redis-server', (err, stdout, stderr) ->
-	    throw err if err?
-	    console.log stdout + stderr
+    # updates libraries (client)
+    exec 'coffee --compile --output web/lib/ ../coos_client-js/lib/coos_client.coffee', (err, stdout, stderr) ->
+        throw err if err?
+        console.log stdout + stderr
+
     exec 'coffee web/server.coffee', (err, stdout, stderr) ->
 	    throw err if err?
 	    console.log stdout + stderr
